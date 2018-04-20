@@ -342,8 +342,7 @@ void sol3_base_derived_measure(benchmark::State& benchmark_state) {
 }
 
 void sol3_optional_measure(benchmark::State& benchmark_state) {
-	sol::state lua;
-	lua.set_panic(lbs::panic_throw);
+	sol::state lua(lbs::panic_throw);
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -356,7 +355,8 @@ void sol3_optional_measure(benchmark::State& benchmark_state) {
 void sol3_return_userdata_measure(benchmark::State& benchmark_state) {
 	sol::state lua(lbs::panic_throw);
 	lua_State* L = lua;
-	lua.set_function("f", sol::c_call<decltype(&lbs::basic_return), lbs::basic_return>);
+
+	lua.set_function("f", sol::c_call<decltype(&lbs::basic_return), &lbs::basic_return>);
 	std::string code = lbs::repeated_code("b = f(i)");
 
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());

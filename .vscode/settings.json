@@ -12,6 +12,12 @@
 		"system_error": "cpp",
 		"xfunctional": "cpp",
 		"xlocmon": "cpp",
-		"xtr1common": "cpp"
-	}
+		"xtr1common": "cpp",
+		"bitset": "cpp",
+		"set": "cpp",
+		"xlocale": "cpp",
+		"xstring": "cpp",
+		"xutility": "cpp"
+	},
+	"C_Cpp.errorSquiggles": "Disabled"
 }

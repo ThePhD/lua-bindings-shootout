@@ -87,7 +87,7 @@ set(lua_bindings_shootout_sources
 	"source/lbs_lua.hpp"
 
 	"source/kaguya.cpp"
-	"source/sol1.cpp"
+	"source/old_sol.cpp"
 	"source/sol2.cpp"
 	"source/sol3.cpp"
 	"source/lua_bindings_shootout.cpp"
@@ -108,5 +108,5 @@ target_link_libraries(lua_bindings_shootout
 target_include_directories(lua_bindings_shootout
 	PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2"
-	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol"
+	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/old_sol"
 )
