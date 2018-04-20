@@ -1,3 +1,12 @@
 {
-	"python.formatting.provider": "yapf"
+	"cmake.configureSettings": {
+		"BUILD_SHARED_LIBS": true,
+	},
+	"python.linting.mypyEnabled": true,
+	"python.formatting.provider": "yapf",
+	"C_Cpp.intelliSenseEngineFallback": "Disabled",
+	"python.formatting.provider": "yapf",
+	"files.associations": {
+		"tuple": "cpp"
+	}
 }

@@ -1,4 +1,4 @@
-# # benchmark lua binding
+# # lua bindings shootout
 # The MIT License (MIT)
 # 
 # Copyright � 2018 ThePhD
@@ -20,30 +20,67 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(3.10.0)
+cmake_minimum_required(VERSION 3.10.0)
 
-project(benchmark_lua_binding VERSION 1.0.0 PROJECT_DESCRIPTION "A library for benchmarking the runtime of various different Lua bindings, since there are so many of them")
+project("lua bindings shootout" 
+	VERSION 1.0.0 
+	DESCRIPTION "A library for benchmarking the runtime of various different Lua bindings, since there are so many of them" 
+	LANGUAGES C CXX
+)
+
+# # CMake Modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 # # Options
 # whether or not we should build as 32-bit
-if (CMAKE_SIZEOF_VOID_P EQ 4)
-	set(BENCHMARK_LUA_BINDING_BUILD_32_BITS ON CACHE BOOL "Enable a 32-bit build.")
+if (CMAKE_SIZEOF_VOID_P EQUAL 4)
+	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS ON CACHE BOOL "Enable a 32-bit build.")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 else()
-	set(BENCHMARK_LUA_BINDING_BUILD_32_BITS OFF CACHE BOOL "Enable a 32-bit build.")
-endif(CMAKE_SIZEOF_VOID_P EQ 4)
+	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS OFF CACHE BOOL "Enable a 32-bit build.")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
+endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+
+# # Get Lua Build through find_package
+find_package(LuaDev 5.3.4 REQUIRED)
+
+# # Get all dependent packages
+find_package(KaguyaDev REQUIRED)
 
 # Subdirectory Google Benchmark, after setting all cache variables
 set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE INTERNAL "Enable the use of exceptions in the benchmark library." FORCE)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "Enable testing of the benchmark library." FORCE)
 set(BENCHMARK_ENABLE_LTO OFF CACHE INTERNAL "Enable link time optimisation of the benchmark library." FORCE)
 set(BENCHMARK_USE_LIBCXX OFF CACHE INTERNAL "Build and test using libc++ as the standard library." FORCE)
-set(BENCHMARK_BUILD_32_BITS ${BENCHMARK_LUA_BINDING_BUILD_32_BITS} CACHE INTERNAL "Build a 32 bit version of the library." FORCE)
+set(BENCHMARK_BUILD_32_BITS ${LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS} CACHE INTERNAL "Build a 32 bit version of the library." FORCE)
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE INTERNAL "Enable installation of benchmark. (Projects embedding benchmark may want to turn this OFF.)" FORCE)
 set(BENCHMARK_DOWNLOAD_DEPENDENCIES OFF CACHE INTERNAL "Allow the downloading and in-tree building of unmet dependencies" FORCE)
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "Enable building the unit tests which depend on gtest" FORCE)
 add_subdirectory(vendor/benchmark)
 
-# Get Lua Build through FindLua
-find_package(LuaBuild 5.3.4 REQUIRED)
+set(lua_bindings_shootout_sources 
+	#"source/common.hpp"
+	#"source/details.hpp"
+	"source/kaguya.cpp"
+	#"source/sol3.cpp"
+	"source/lua_bindings_shootout.cpp"
+)
 
-# # Visualization Targets
+add_executable(lua_bindings_shootout ${lua_bindings_shootout_sources})
+target_link_libraries(lua_bindings_shootout
+	PRIVATE 
+	# lua library
+	${LUA_LIBRARIES} 
+	# binding libraries
+	${KAGUYA_LIBRARIES} 
+	# benchmarking library and utilities
+	benchmark
+)
+target_link_libraries(lua_bindings_shootout
+	INTERFACE
+	sol2
+)

@@ -1,4 +1,4 @@
-# # benchmark lua binding
+# # lua bindings shootout
 # The MIT License (MIT)
 #
 # Copyright � 2018 ThePhD

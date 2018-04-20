@@ -1,4 +1,4 @@
-# # benchmark lua binding
+# # lua bindings shootout
 # The MIT License (MIT)
 # 
 # Copyright � 2018 ThePhD
@@ -21,10 +21,10 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Include guard
-if(_lua_vanilla_build_included)
+if(_lua_vanilla_dev_included)
 	return()
-endif(_lua_vanilla_build_included)
-set(_lua_vanilla_build_included true)
+endif(_lua_vanilla_dev_included)
+set(_lua_vanilla_dev_included true)
 
 # import necessary standard modules
 include(ExternalProject)
@@ -133,9 +133,9 @@ else()
 	message(FATAL_ERROR "Cannot deduce the proper Lua version from ${LUA_VERSION}")
 endif()
 
-FIND_PACKAGE_MESSAGE(LUABUILD
-	"Selecting PUC-RIO Lua ${LUA_VANILLA_VERSION} from '${LUA_VERSION}' and building a ${LUA_BUILD_LIBRARY_TYPE} library..."
-	"[${LUA_VANILLA_VERSION}][${LUA_VERSION}][${LUA_BUILD_LIBRARY_TYPE}]")
+FIND_PACKAGE_MESSAGE(LuaDev
+	"Selecting PUC-RIO Lua ${LUA_VANILLA_VERSION} from '${LUA_VERSION}' and building a ${LUA_DEV_LIBRARY_TYPE} library..."
+	"[${LUA_VANILLA_VERSION}][${LUA_VERSION}][${LUA_DEV_LIBRARY_TYPE}]")
 
 # Get Hashes to use for download
 set(LUA_VANILLA_SHA1 ${LUA_VANILLA_SHA1_${LUA_VANILLA_VERSION}})
@@ -201,7 +201,7 @@ else()
 	set(LUA_VANILLA_GENERATE_LUA_HPP false)
 endif()
 
-set(LUA_VANILLA_SOURCE_DIR "${LUA_BUILD_TOPLEVEL}/src")
+set(LUA_VANILLA_SOURCE_DIR "${LUA_DEV_TOPLEVEL}/src")
 prepend(LUA_VANILLA_LIB_SOURCES "${LUA_VANILLA_SOURCE_DIR}/" ${LUA_VANILLA_LIB_SOURCES})
 prepend(LUA_VANILLA_LUA_SOURCES "${LUA_VANILLA_SOURCE_DIR}/" ${LUA_VANILLA_LUA_SOURCES})
 prepend(LUA_VANILLA_LUAC_SOURCES "${LUA_VANILLA_SOURCE_DIR}/" ${LUA_VANILLA_LUAC_SOURCES})
@@ -215,12 +215,12 @@ ExternalProject_Add(LUA_VANILLA
 	BUILD_IN_SOURCE TRUE
 	BUILD_ALWAYS FALSE
 	TLS_VERIFY TRUE
-	PREFIX ${LUA_BUILD_TOPLEVEL}
-	SOURCE_DIR ${LUA_BUILD_TOPLEVEL}
-	DOWNLOAD_DIR ${LUA_BUILD_TOPLEVEL}
-	TMP_DIR "${LUA_BUILD_TOPLEVEL}-tmp"
-	STAMP_DIR "${LUA_BUILD_TOPLEVEL}-stamp"
-	INSTALL_DIR "${LUA_BUILD_INSTALL_DIR}"
+	PREFIX ${LUA_DEV_TOPLEVEL}
+	SOURCE_DIR ${LUA_DEV_TOPLEVEL}
+	DOWNLOAD_DIR ${LUA_DEV_TOPLEVEL}
+	TMP_DIR "${LUA_DEV_TOPLEVEL}-tmp"
+	STAMP_DIR "${LUA_DEV_TOPLEVEL}-stamp"
+	INSTALL_DIR "${LUA_DEV_INSTALL_DIR}"
 	URL https://www.lua.org/ftp/lua-${LUA_VANILLA_VERSION}.tar.gz
 	URL_MD5 ${LUA_VANILLA_MD5}
 	URL_HASH SHA1=${LUA_VANILLA_SHA1}
@@ -242,7 +242,7 @@ extern \"C\" {
 #include \"lauxlib.h\"
 }
 ")
-	set(LUA_VANILLA_SOURCE_LUA_HPP "${LUA_BUILD_TOPLEVEL}-tmp/lua.hpp")
+	set(LUA_VANILLA_SOURCE_LUA_HPP "${LUA_DEV_TOPLEVEL}-tmp/lua.hpp")
 	set(LUA_VANILLA_DESTINATION_LUA_HPP "${LUA_VANILLA_SOURCE_DIR}/lua.hpp")
 	file(WRITE "${LUA_VANILLA_SOURCE_LUA_HPP}" "${LUA_VANILLA_LUA_HPP_CONTENT}")
 	file(TO_NATIVE_PATH "${LUA_VANILLA_SOURCE_LUA_HPP}" LUA_VANILLA_SOURCE_LUA_HPP)
@@ -271,7 +271,7 @@ set(luacompiler "luac-${LUA_VANILLA_VERSION}")
 
 # make an actual, buildable target
 # that other parts of the code can depend on
-add_library(${liblua} ${LUA_BUILD_LIBRARY_TYPE} "${LUA_VANILLA_LIB_SOURCES}")
+add_library(${liblua} ${LUA_DEV_LIBRARY_TYPE} "${LUA_VANILLA_LIB_SOURCES}")
 set_target_properties(${liblua}
 	PROPERTIES
 	LANGUAGE C
@@ -280,10 +280,10 @@ set_target_properties(${liblua}
 	C_EXTENSIONS TRUE
 	POSITION_INDEPENDENT_CODE TRUE
 	INCLUDE_DIRECTORIES ${LUA_VANILLA_SOURCE_DIR}
-	OUTPUT_NAME ${LUA_BUILD_LIBNAME}
-	RUNTIME_OUTPUT_NAME ${LUA_BUILD_LIBNAME}
-	LIBRARY_OUTPUT_NAME ${LUA_BUILD_LIBNAME}
-	ARCHIVE_OUTPUT_NAME ${LUA_BUILD_LIBNAME})
+	OUTPUT_NAME ${LUA_DEV_LIBNAME}
+	RUNTIME_OUTPUT_NAME ${LUA_DEV_LIBNAME}
+	LIBRARY_OUTPUT_NAME ${LUA_DEV_LIBNAME}
+	ARCHIVE_OUTPUT_NAME ${LUA_DEV_LIBNAME})
 target_include_directories(${liblua}
 	PUBLIC ${LUA_VANILLA_SOURCE_DIR})
 target_compile_definitions(${liblua}
