@@ -33,20 +33,31 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 # # Options
 # whether or not we should build as 32-bit
-if (CMAKE_SIZEOF_VOID_P EQUAL 4)
+if (CMAKE_SIZEOF_VOID_P EQUAL 4 OR LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS)
 	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS ON CACHE BOOL "Enable a 32-bit build.")
+	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
+	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 else()
 	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS OFF CACHE BOOL "Enable a 32-bit build.")
+	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
+	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
-endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+endif(CMAKE_SIZEOF_VOID_P EQUAL 4 OR LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS)
 
 # # Get Lua Build through find_package
+# Wrap it in shared specifiers...
+set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS TRUE)
 find_package(LuaDev 5.3.4 REQUIRED)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
+set(BUILD_SHARED_LIBS_SAVED "")
+
+find_package(Threads REQUIRED)
 
 # # Get all dependent packages
 find_package(KaguyaDev REQUIRED)
@@ -60,7 +71,19 @@ set(BENCHMARK_BUILD_32_BITS ${LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS} CACHE INTERNA
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE INTERNAL "Enable installation of benchmark. (Projects embedding benchmark may want to turn this OFF.)" FORCE)
 set(BENCHMARK_DOWNLOAD_DEPENDENCIES OFF CACHE INTERNAL "Allow the downloading and in-tree building of unmet dependencies" FORCE)
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "Enable building the unit tests which depend on gtest" FORCE)
+# Google bnechmark must be built as a static library,
+# it doesn't contain export definitions
+set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS FALSE)
 add_subdirectory(vendor/benchmark)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
+set(BUILD_SHARED_LIBS_SAVED "")
+
+add_subdirectory(vendor/sol3)
+
+if(TARGET sol2)
+	MESSAGE(sol2 is a TARGET)
+endif()
 
 set(lua_bindings_shootout_sources 
 	#"source/common.hpp"
@@ -74,13 +97,11 @@ add_executable(lua_bindings_shootout ${lua_bindings_shootout_sources})
 target_link_libraries(lua_bindings_shootout
 	PRIVATE 
 	# lua library
-	${LUA_LIBRARIES} 
+	${LUA_LIBRARIES}
 	# binding libraries
-	${KAGUYA_LIBRARIES} 
+	${KAGUYA_LIBRARIES}
 	# benchmarking library and utilities
-	benchmark
-)
-target_link_libraries(lua_bindings_shootout
-	INTERFACE
+	Threads::Threads
 	sol2
+	benchmark
 )
