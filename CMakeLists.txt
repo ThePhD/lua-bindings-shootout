@@ -79,17 +79,17 @@ add_subdirectory(vendor/benchmark)
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
 set(BUILD_SHARED_LIBS_SAVED "")
 
-add_subdirectory(vendor/sol3)
-
-if(TARGET sol2)
-	MESSAGE(sol2 is a TARGET)
-endif()
+add_subdirectory(vendor/sol3/sol3)
 
 set(lua_bindings_shootout_sources 
-	#"source/common.hpp"
-	#"source/details.hpp"
+	"source/benchmark.hpp"
+	"source/lbs_lib.hpp"
+	"source/lbs_lua.hpp"
+
 	"source/kaguya.cpp"
-	#"source/sol3.cpp"
+	"source/sol1.cpp"
+	"source/sol2.cpp"
+	"source/sol3.cpp"
 	"source/lua_bindings_shootout.cpp"
 )
 
@@ -100,8 +100,13 @@ target_link_libraries(lua_bindings_shootout
 	${LUA_LIBRARIES}
 	# binding libraries
 	${KAGUYA_LIBRARIES}
+	sol2
 	# benchmarking library and utilities
 	Threads::Threads
-	sol2
 	benchmark
+)
+target_include_directories(lua_bindings_shootout
+	PRIVATE
+	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2"
+	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol"
 )

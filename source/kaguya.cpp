@@ -31,9 +31,9 @@ void kaguya_global_string_get_measure(benchmark::State& benchmark_state) {
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
 	lua["value"] = 3;
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = lua["value"];
+		double v = lua["value"];
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
@@ -43,10 +43,10 @@ void kaguya_global_string_set_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
-	int x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua["value"] = x;
-		++x;
+		x += 3;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations());
 }
@@ -58,9 +58,9 @@ void kaguya_table_get_measure(benchmark::State& benchmark_state) {
 	lua["warble"] = kaguya::NewTable();
 	lua["warble"]["value"] = 3;
 	kaguya::LuaTable t = lua["warble"];
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = t["value"];
+		double v = t["value"];
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
@@ -72,7 +72,7 @@ void kaguya_table_set_measure(benchmark::State& benchmark_state) {
 
 	lua["warble"] = kaguya::NewTable();
 	kaguya::LuaTable t = lua["warble"];
-	int x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
 		t["value"] = x;
 		x += 3;
@@ -87,9 +87,9 @@ void kaguya_table_chained_get_measure(benchmark::State& benchmark_state) {
 	lua["ulahibe"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"]["value"] = 3;
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = lua["ulahibe"]["warble"]["value"];
+		double v = lua["ulahibe"]["warble"]["value"];
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
@@ -102,12 +102,12 @@ void kaguya_table_chained_set_measure(benchmark::State& benchmark_state) {
 	lua["ulahibe"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"]["value"] = 24;
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua["ulahibe"]["warble"]["value"] = x;
 		x += 3;
 	}
-	int v = lua["ulahibe"]["warble"]["value"];
+	double v = lua["ulahibe"]["warble"]["value"];
 	lbs::expect(benchmark_state, x, v);
 }
 
@@ -135,9 +135,9 @@ void kaguya_lua_function_measure(benchmark::State& benchmark_state) {
 		return i;
 	end)");
 	kaguya::LuaFunction f = lua["f"];
-	int x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = f(3);
+		double v = f(3);
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
@@ -149,9 +149,9 @@ void kaguya_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 
 	lua["f"].setFunction(lbs::basic_call);
 	kaguya::LuaFunction f = lua["f"];
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = f(3);
+		double v = f(3);
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
@@ -207,9 +207,9 @@ void kaguya_stateful_function_object_measure(benchmark::State& benchmark_state) 
 
 	lua["f"] = kaguya::function(lbs::basic_stateful());
 	kaguya::LuaFunction f = lua["f"];
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = f(3);
+		double v = f(3);
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
@@ -221,9 +221,9 @@ void kaguya_multi_return_measure(benchmark::State& benchmark_state) {
 
 	lua["f"].setFunction(lbs::basic_multi_return);
 	kaguya::LuaFunction f = lua["f"];
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int a, b;
+		double a, b;
 		kaguya::tie(a, b) = f(3);
 		x += a;
 		x += b;
@@ -256,7 +256,7 @@ void kaguya_base_derived_measure(benchmark::State& benchmark_state) {
 			return;
 		}
 	}
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
 		lbs::complex_base_a* va = lua["b"];
 		lbs::complex_base_b* vb = lua["b"];
@@ -288,9 +288,9 @@ void kaguya_optional_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
-	int64_t x = 0;
+	double x = 0;
 	for (auto _ : benchmark_state) {
-		int v = lua["warble"]["value"].value_or<int>(1);
+		double v = lua["warble"]["value"].value_or<double>(1);
 		x += v;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);

@@ -1,10 +1,17 @@
 {
-	"cmake.configureSettings": {},
+	"cmake.configureSettings": {
+		"BUILD_SHARED_LIBS": true
+	},
 	"python.linting.mypyEnabled": true,
 	"python.formatting.provider": "yapf",
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
 	"python.formatting.provider": "yapf",
 	"files.associations": {
-		"tuple": "cpp"
+		"tuple": "cpp",
+		"regex": "cpp",
+		"system_error": "cpp",
+		"xfunctional": "cpp",
+		"xlocmon": "cpp",
+		"xtr1common": "cpp"
 	}
 }

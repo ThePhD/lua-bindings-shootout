@@ -278,7 +278,7 @@ target_compile_definitions(${liblua}
 get_target_property(lualib_target_type ${liblua} TYPE)
 if (lualib_target_type STREQUAL "SHARED_LIBRARY")
 	target_compile_definitions(${liblua}
-		PUBLIC BUILD_LUA_AS_DLL)
+		PUBLIC LUA_BUILD_2AS_DLL)
 endif ()
 if (MSVC)
 	target_compile_options(${liblua}
