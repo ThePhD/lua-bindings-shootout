@@ -29,37 +29,37 @@ include(Common/Core)
 set(toluapp_version 1.0.93)
 
 # # Useful locations
-set(toluapp_build_toplevel "${CMAKE_BINARY_DIR}/vendor/toluapp_${toluapp_version}")
-set(toluapp_include_dirs "${toluapp_build_toplevel}/include")
+set(toluapp_dev_toplevel "${CMAKE_BINARY_DIR}/vendor/toluapp_${toluapp_version}")
+set(toluapp_include_dirs "${toluapp_dev_toplevel}/include")
 
 # # ToLua library sources
 set(toluapp_sources tolua_event.c tolua_event.h tolua_is.c tolua_map.c tolua_push.c tolua_to.c tolua_compat.h tolua_compat.c)
-prepend(toluapp_sources "${toluapp_build_toplevel}/src/lib/" ${toluapp_sources})
-list(APPEND toluapp_sources "${toluapp_build_toplevel}/include/tolua++.h")
+prepend(toluapp_sources "${toluapp_dev_toplevel}/src/lib/" ${toluapp_sources})
+list(APPEND toluapp_sources "${toluapp_dev_toplevel}/include/tolua++.h")
 
 # # External project to get sources
-ExternalProject_Add(TOLUAPP_BUILD_SOURCE
+ExternalProject_Add(TOLUAPP_DEV_SOURCE
 	BUILD_IN_SOURCE TRUE
 	BUILD_ALWAYS FALSE
 	# # Use Git to get what we need
 	#GIT_SUBMODULES ""
 	GIT_SHALLOW TRUE
-	GIT_REPOSITORY https://github.com/ThePhD/toluapp
-	PREFIX ${toluapp_build_toplevel}
-	SOURCE_DIR ${toluapp_build_toplevel}
-	DOWNLOAD_DIR ${toluapp_build_toplevel}
-	TMP_DIR "${toluapp_build_toplevel}-tmp"
-	STAMP_DIR "${toluapp_build_toplevel}-stamp"
-	INSTALL_DIR "${toluapp_build_toplevel}/local"
+	GIT_REPOSITORY https://github.com/ThePhD/toluapp.git
+	PREFIX ${toluapp_dev_toplevel}
+	SOURCE_DIR ${toluapp_dev_toplevel}
+	DOWNLOAD_DIR ${toluapp_dev_toplevel}
+	TMP_DIR "${toluapp_dev_toplevel}-tmp"
+	STAMP_DIR "${toluapp_dev_toplevel}-stamp"
+	INSTALL_DIR "${toluapp_dev_toplevel}/local"
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
 	TEST_COMMAND ""
 	BUILD_BYPRODUCTS "${toluapp_sources}")
 
-set(toluapp_lib toluapp_lib_5.2.4)
+set(toluapp_lib toluapp_lib_${toluapp_version})
 add_library(${toluapp_lib} SHARED ${toluapp_sources})
-add_dependencies(${toluapp_lib} TOLUAPP_BUILD_SOURCE)
+add_dependencies(${toluapp_lib} TOLUAPP_DEV_SOURCE)
 set_target_properties(${toluapp_lib} PROPERTIES
 	OUTPUT_NAME toluapp-${toluapp_version}
 	POSITION_INDEPENDENT_CODE TRUE)
@@ -68,14 +68,21 @@ target_include_directories(${toluapp_lib}
 target_link_libraries(${toluapp_lib} PRIVATE ${LUA_LIBRARIES})
 if (MSVC)
 	target_compile_options(${toluapp_lib}
-		PRIVATE /W1)
+		PRIVATE /W1
+	)
 	target_compile_definitions(${toluapp_lib}
-		PRIVATE TOLUA_API=__declspec(dllexport))
+		PRIVATE "TOLUA_API=__declspec(dllexport)"
+		INTERFACE "TOLUA_API=__declspec(dllimport)"
+	)
 else()
 	target_compile_options(${toluapp_lib}
 		PRIVATE -w
 		INTERFACE -Wno-noexcept-type
 		PUBLIC -Wno-ignored-qualifiers -Wno-unused-parameter)
+	target_compile_definitions(${toluapp_lib}
+		PRIVATE TOLUA_API=
+		INTERFACE TOLUA_API=extern
+	)
 endif()
 if (CMAKE_DL_LIBS)
 	target_link_libraries(${toluapp_lib} PRIVATE ${CMAKE_DL_LIBS})
@@ -84,12 +91,12 @@ endif()
 target_compile_definitions(${toluapp_lib}
 		PRIVATE COMPAT53_PREFIX=toluapp_compat53)
 
-# # Variables required by ToLuaBuild
+# # Variables required by ToLuapp
 set(TOLUAPP_LIBRARIES ${toluapp_lib})
 set(TOLUAPP_INCLUDE_DIRS ${toluapp_include_dirs})
-set(TOLUAPPBUILD_FOUND TRUE)
+set(TOLUAPPDEV_FOUND TRUE)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ToLuappBuild
-	FOUND_VAR TOLUAPPBUILD_FOUND
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ToLuappDev
+	FOUND_VAR TOLUAPPDEV_FOUND
 	REQUIRED_VARS TOLUAPP_LIBRARIES TOLUAPP_INCLUDE_DIRS
 	VERSION_VAR toluapp_version)

@@ -31,7 +31,7 @@ namespace lbs {
 	template <typename T, typename U>
 	inline void expect(benchmark::State& benchmark_state, const T& left, const U& right) {
 		if (left != right) {
-			benchmark_state.SkipWithError("benchmark is invalid:!");
+			benchmark_state.SkipWithError("unexpected result");
 		}
 	}
 
@@ -40,7 +40,7 @@ namespace lbs {
 	}
 
 	inline void unsupported(benchmark::State& benchmark_state) {
-		unsupported(benchmark_state, "benchmark cannot be run because this operation is unsupported!");
+		unsupported(benchmark_state, "operation is unsupported!");
 	}
 
 	const int repetition = 1000;

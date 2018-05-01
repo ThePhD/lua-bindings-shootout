@@ -20,6 +20,9 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#ifndef LUA_BINDINGS_SHOOTOUT_LUA_HPP
+#define LUA_BINDINGS_SHOOTOUT_LUA_HPP
+
 #pragma once
 
 #include "lbs_lib.hpp"
@@ -41,29 +44,29 @@ namespace lbs {
 	}
 
 	inline int basic_call_wrap(lua_State* L) {
-		int x = basic_call(static_cast<int>(lua_tointeger(L, -1)));
-		lua_pushinteger(L, x);
+		double x = basic_call(static_cast<double>(lua_tonumber(L, -1)));
+		lua_pushnumber(L, x);
 		return 1;
 	}
 
 	inline int basic_stateful_wrap(lua_State* L) {
 		basic_stateful& bs = *static_cast<basic_stateful*>(lua_touserdata(L, lua_upvalueindex(1)));
-		int x = bs(static_cast<int>(lua_tointeger(L, -1)));
-		lua_pushinteger(L, x);
+		double x = bs(static_cast<double>(lua_tonumber(L, -1)));
+		lua_pushnumber(L, x);
 		return 1;
 	}
 
 	inline int basic_multi_return_wrap(lua_State* L) {
-		int x, y;
-		std::tie(x, y) = basic_multi_return(static_cast<int>(lua_tointeger(L, -1)));
-		lua_pushinteger(L, x);
-		lua_pushinteger(L, y);
+		double x, y;
+		std::tie(x, y) = basic_multi_return(static_cast<double>(lua_tonumber(L, -1)));
+		lua_pushnumber(L, x);
+		lua_pushnumber(L, y);
 		return 2;
 	}
 
 	inline int basic_return_wrap(lua_State* L) {
 		basic* data = static_cast<basic*>(lua_newuserdata(L, sizeof(basic)));
-		new (data) basic(basic_return(static_cast<int>(lua_tointeger(L, -1))));
+		new (data) basic(basic_return(static_cast<double>(lua_tonumber(L, 1))));
 		if (luaL_newmetatable(L, "basic") == 0) {
 			lua_pushcclosure(L, &gc_wrap<basic>, 0);
 			lua_setfield(L, -2, "__gc");
@@ -76,13 +79,13 @@ namespace lbs {
 		void* x = lua_touserdata(L, 1);
 		basic* b = static_cast<basic*>(x);
 		lua_pop(L, 1);
-		lua_pushinteger(L, b->get());
+		lua_pushnumber(L, b->get());
 		return 1;
 	}
 
 	inline int basic_set_wrap(lua_State* L) {
 		void* x = lua_touserdata(L, 1);
-		int arg1 = static_cast<int>(lua_tointeger(L, 2));
+		double arg1 = static_cast<double>(lua_tonumber(L, 2));
 		basic* b = static_cast<basic*>(x);
 		lua_pop(L, 2);
 		b->set(arg1);
@@ -93,7 +96,7 @@ namespace lbs {
 		void* x = lua_touserdata(L, 1);
 		complex_ab* b = *static_cast<complex_ab**>(x);
 		lua_pop(L, 1);
-		lua_pushinteger(L, b->ab_func());
+		lua_pushnumber(L, b->ab_func());
 		return 1;
 	}
 
@@ -101,7 +104,7 @@ namespace lbs {
 		void* x = lua_touserdata(L, 1);
 		complex_ab* b = *static_cast<complex_ab**>(x);
 		lua_pop(L, 1);
-		lua_pushinteger(L, b->b_func());
+		lua_pushnumber(L, b->b_func());
 		return 1;
 	}
 
@@ -109,7 +112,7 @@ namespace lbs {
 		void* x = lua_touserdata(L, 1);
 		complex_ab* b = *static_cast<complex_ab**>(x);
 		lua_pop(L, 1);
-		lua_pushinteger(L, b->a_func());
+		lua_pushnumber(L, b->a_func());
 		return 1;
 	}
 
@@ -132,17 +135,17 @@ namespace lbs {
 		complex_ab* b = static_cast<complex_ab*>(x);
 		if (strcmp(name, "ab") == 0) {
 			lua_pop(L, 1);
-			lua_pushinteger(L, b->ab);
+			lua_pushnumber(L, b->ab);
 			return 1;
 		}
 		if (strcmp(name, "a") == 0) {
 			lua_pop(L, 1);
-			lua_pushinteger(L, b->a);
+			lua_pushnumber(L, b->a);
 			return 1;
 		}
 		if (strcmp(name, "b") == 0) {
 			lua_pop(L, 1);
-			lua_pushinteger(L, b->b);
+			lua_pushnumber(L, b->b);
 			return 1;
 		}
 		lua_pop(L, 2);
@@ -276,7 +279,7 @@ namespace lbs {
 		void* x = lua_touserdata(L, 1);
 		basic* b = *static_cast<basic**>(x);
 		lua_pop(L, 1);
-		lua_pushinteger(L, b->var);
+		lua_pushnumber(L, b->var);
 		return 1;
 	}
 
@@ -288,7 +291,7 @@ namespace lbs {
 			return 0;
 		}
 		void* x = lua_touserdata(L, 1);
-		int arg1 = static_cast<int>(lua_tointeger(L, 3));
+		double arg1 = static_cast<double>(lua_tonumber(L, 3));
 		basic* b = *static_cast<basic**>(x);
 		lua_pop(L, 3);
 		b->var = arg1;
@@ -320,14 +323,9 @@ namespace lbs {
 	inline int basic_large_newindex_wrap(lua_State* L) {
 		std::size_t sz;
 		const char* name = lua_tolstring(L, 2, &sz);
-		if (strcmp(name, "var") != 0) {
-			lua_pop(L, 3);
-			return 0;
-		}
 		void* x = lua_touserdata(L, 1);
 		basic_large** pb = static_cast<basic_large**>(x);
 		basic_large& b = **pb;
-		int arg1 = static_cast<int>(lua_tointeger(L, 3));
 		auto it = basic_large_members().find(name);
 		if (it != basic_large_members().cend()) {
 			auto& bv = it->second;
@@ -390,8 +388,31 @@ namespace lbs {
 		do_panic_throw(err);
 	}
 
+	struct lua_closer {
+		void operator()(lua_State* L) const {
+			lua_close(L);
+		}
+	};
+
+	using luabridge_closer = lua_closer;
+
+	inline std::unique_ptr<lua_State, lua_closer> create_state(bool open_libs = false) {
+		std::unique_ptr<lua_State, lua_closer> lua(luaL_newstate());
+		lua_State* L = lua.get();
+		if (open_libs) {
+			luaL_openlibs(L);
+		}
+		lua_atpanic(L, panic_throw);
+		return std::move(lua);
+	}
+
+	const std::string userdata_variable_access_check = "b.var = 67890 x = b.var assert(x == 67890)";
 	const std::string userdata_variable_access_code = "b.var = i x = b.var";
+
+	const std::string userdata_variable_access_large_last_check = "b.var49 = 67890 x = b.var49 assert(x == 67890)";
 	const std::string userdata_variable_access_large_last_code = "b.var49 = i x = b.var49";
+
+	const std::string userdata_variable_access_large_check = "b.var49 = 67890 x = b.var49 assert(x == 67890) b.var = 67890 x = b.var assert(x == 67890)";
 	const std::string userdata_variable_access_large_code =
 		"b.var = i x = b.var "
 		"b.var0 = i x = b.var0 "
@@ -445,5 +466,20 @@ namespace lbs {
 		"b.var48 = i x = b.var48 "
 		"b.var1 = i x = b.var1 ";
 
-	const std::string member_function_call_code = "b:set(i) b:get()";
+	const std::string return_userdata_check = "b = f(46705) x = h(b) assert(x == 46705)";
+	const std::string return_userdata_code = "b = f(i)";
+
+	const std::string implicit_inheritance_check = "x = b:b_func() assert(x == 3)";
+	const std::string implicit_inheritance_code = "b:b_func()";
+
+	const std::string stateful_call_check = "x = f(670384) assert(x == 670384)";
+	const std::string stateful_call_code = "x = f(i)";
+
+	const std::string c_function_check = "x = f(670384) assert(x == 670384)";
+	const std::string c_function_code = "x = f(i)";
+
+	const std::string member_function_call_check = "b:set(56921) x = b:get() assert(x == 56921)";
+	const std::string member_function_call_code = "b:set(i) x = b:get()";
 } // namespace lbs
+
+#endif // LUA_BINDINGS_SHOOTOUT_LUA_HPP

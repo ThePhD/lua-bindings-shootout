@@ -6,7 +6,7 @@
 namespace lbs {
 
 	struct basic {
-		int var = 499;
+		double var = 499;
 		int var0 = 501;
 		int var1 = 502;
 		int var2 = 503;
@@ -14,21 +14,21 @@ namespace lbs {
 		int var4 = 505;
 
 		basic() = default;
-		basic(int x)
+		basic(double x)
 		: var(x) {
 		}
 
-		int get() const {
+		double get() const {
 			return var;
 		}
 
-		void set(int x) {
+		void set(double x) {
 			var = x;
 		}
 	};
 
 	struct basic_large {
-		int var = 499;
+		double var = 499;
 		int var0 = 500;
 		int var1 = 501;
 		int var2 = 502;
@@ -82,59 +82,63 @@ namespace lbs {
 	};
 
 	struct basic_stateful {
-		int storage;
+		double storage;
 
-		int operator()(int i) {
+		double operator()(double i) {
 			storage = i;
 			return storage;
 		}
 	};
 
 	struct complex_base_a {
-		int a = 1;
+		double a = 1;
 
-		virtual int a_func() const {
+		virtual double a_func() const {
 			return a;
 		}
 	};
 
 	struct complex_base_b {
-		int b = 2;
+		double b = 2;
 
-		virtual int b_func() const {
+		virtual double b_func() const {
 			return b;
 		}
 	};
 
 	struct complex_ab : complex_base_a, complex_base_b {
-		int ab = 3;
+		double ab = 3;
 
-		virtual int a_func() const override {
+		virtual double a_func() const override {
 			return ab;
 		}
 
-		virtual int b_func() const override {
+		virtual double b_func() const override {
 			return ab;
 		}
 
-		int ab_func() const {
+		double ab_func() const {
 			return ab;
 		}
 	};
 
-	inline int basic_call(int x) {
+	inline double basic_call(double x) {
 		return x;
 	}
 
-	inline basic basic_return(int x) {
+	inline basic basic_return(double x) {
 		return basic(x);
 	}
 
-	inline std::tuple<int, int> basic_multi_return(int i) {
+	inline double basic_get(const basic& b) {
+		return b.var;
+	}
+
+	inline std::tuple<double, double> basic_multi_return(double i) {
 		return { i, i * 2 };
 	}
 
-	inline void basic_multi_return_out(int i, int& out_1, int& out_2) {
+	inline void basic_multi_return_out(double i, double& out_1, double& out_2) {
 		std::tie(out_1, out_2) = basic_multi_return(i);
 	}
 

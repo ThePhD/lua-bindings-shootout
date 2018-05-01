@@ -5,7 +5,7 @@
 	"python.linting.mypyEnabled": true,
 	"python.formatting.provider": "yapf",
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
-	"python.formatting.provider": "yapf",
+	"C_Cpp.errorSquiggles": "Disabled",
 	"files.associations": {
 		"tuple": "cpp",
 		"regex": "cpp",
@@ -17,7 +17,17 @@
 		"set": "cpp",
 		"xlocale": "cpp",
 		"xstring": "cpp",
-		"xutility": "cpp"
+		"xutility": "cpp",
+		"array": "cpp",
+		"istream": "cpp",
+		"memory": "cpp",
+		"type_traits": "cpp",
+		"utility": "cpp",
+		"variant": "cpp",
+		"xlocmes": "cpp",
+		"xlocnum": "cpp",
+		"xloctime": "cpp",
+		"stack": "cpp",
+		"iostream": "cpp"
 	},
-	"C_Cpp.errorSquiggles": "Disabled"
 }

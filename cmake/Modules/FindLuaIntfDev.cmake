@@ -25,51 +25,51 @@ include(FindPackageHandleStandardArgs)
 include(Common/Core)
 
 # # Base variables
-set(luwra_version 0.5.0)
-set(luwra_lib luwra_lib_${luwra_version})
+set(luaintf_version 1.0.0)
+set(luaintf_lib luaintf_lib_${luaintf_version})
 
 # # Useful locations
-set(luwra_dev_toplevel "${CMAKE_BINARY_DIR}/vendor/luwra_${luwra_version}")
-set(luwra_include_dirs "${luwra_dev_toplevel}/lib")
+set(luaintf_dev_toplevel "${CMAKE_BINARY_DIR}/vendor/luaintf_${luaintf_version}")
+set(luaintf_include_dirs "${luaintf_dev_toplevel}/")
 
-# # luwra library sources
-set(luwra_sources luwra.hpp)
-prepend(luwra_sources "${luwra_dev_toplevel}/lib/" ${luwra_sources})
+# # luaintf library sources
+set(luaintf_sources LuaIntf.h)
+prepend(luaintf_sources "${luaintf_dev_toplevel}/LuaIntf/" ${luaintf_sources})
 
 # # External project to get sources
-ExternalProject_Add(LUWRADEV_SOURCE
+ExternalProject_Add(LUAINTFDEV_SOURCE
 	BUILD_IN_SOURCE TRUE
 	BUILD_ALWAYS FALSE
 	# # Use Git to get what we need
 	GIT_SHALLOW TRUE
 	#GIT_TAG e513907fc8c2d59ebd91cd5992eddf54f7e23e21
-	GIT_REPOSITORY https://github.com/vapourismo/luwra.git
-	PREFIX ${luwra_dev_toplevel}
-	SOURCE_DIR ${luwra_dev_toplevel}
-	DOWNLOAD_DIR ${luwra_dev_toplevel}
-	TMP_DIR "${luwra_dev_toplevel}-tmp"
-	STAMP_DIR "${luwra_dev_toplevel}-stamp"
-	INSTALL_DIR "${luwra_dev_toplevel}/local"
+	GIT_REPOSITORY https://github.com/SteveKChiu/lua-intf.git
+	PREFIX ${luaintf_dev_toplevel}
+	SOURCE_DIR ${luaintf_dev_toplevel}
+	DOWNLOAD_DIR ${luaintf_dev_toplevel}
+	TMP_DIR "${luaintf_dev_toplevel}-tmp"
+	STAMP_DIR "${luaintf_dev_toplevel}-stamp"
+	INSTALL_DIR "${luaintf_dev_toplevel}/local"
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
 	TEST_COMMAND ""
-	BUILD_BYPRODUCTS "${luwra_sources}")
+	BUILD_BYPRODUCTS "${luaintf_sources}")
 
-add_library(${luwra_lib} INTERFACE)
-add_dependencies(${luwra_lib} LUWRADEV_SOURCE)
-target_include_directories(${luwra_lib} INTERFACE ${luwra_include_dirs})
-target_link_libraries(${luwra_lib} INTERFACE ${LUA_LIBRARIES})
+add_library(${luaintf_lib} INTERFACE)
+add_dependencies(${luaintf_lib} LUAINTFDEV_SOURCE)
+target_include_directories(${luaintf_lib} INTERFACE ${luaintf_include_dirs})
+target_link_libraries(${luaintf_lib} INTERFACE ${LUA_LIBRARIES})
 if (NOT MSVC)
-	target_compile_options(${luwra_lib} INTERFACE
+	target_compile_options(${luaintf_lib} INTERFACE
 		-Wno-noexcept-type -Wno-ignored-qualifiers -Wno-unused-parameter)
 endif()
 
-set(LUWRADEV_FOUND TRUE)
-set(LUWRA_LIBRARIES ${luwra_lib})
-set(LUWRA_INCLUDE_DIRS ${luwra_include_dirs})
+set(LUAINTFDEV_FOUND TRUE)
+set(LUAINTF_LIBRARIES ${luaintf_lib})
+set(LUAINTF_INCLUDE_DIRS ${luaintf_include_dirs})
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LuwraDev
-	FOUND_VAR LUWRADEV_FOUND
-	REQUIRED_VARS LUWRA_LIBRARIES LUWRA_INCLUDE_DIRS
-	VERSION_VAR luwra_version)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(LuaIntfDev
+	FOUND_VAR LUAINTFDEV_FOUND
+	REQUIRED_VARS LUAINTF_LIBRARIES LUAINTF_INCLUDE_DIRS
+	VERSION_VAR luaintf_version)

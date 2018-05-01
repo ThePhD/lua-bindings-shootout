@@ -31,7 +31,7 @@ set(luabridge_lib luabridge_lib_${luabridge_version})
 
 # # Useful locations
 set(luabridge_build_toplevel "${CMAKE_BINARY_DIR}/vendor/luabridge_${luabridge_version}")
-set(luabridge_include_dirs "${luabridge_build_toplevel}/include")
+set(luabridge_include_dirs "${luabridge_build_toplevel}/Source")
 
 # # luabridge library sources
 set(luabridge_sources LuaBridge/LuaBridge.h)

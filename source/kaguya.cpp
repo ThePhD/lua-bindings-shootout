@@ -43,12 +43,15 @@ void kaguya_global_string_set_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
-	double x = 0;
+	double v = 0;
 	for (auto _ : benchmark_state) {
-		lua["value"] = x;
-		x += 3;
+		v += 3;
+		lua["value"] = v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations());
+	double x = lua["value"];
+	lbs::expect(benchmark_state, x, v);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
 }
 
 void kaguya_table_get_measure(benchmark::State& benchmark_state) {
@@ -72,12 +75,15 @@ void kaguya_table_set_measure(benchmark::State& benchmark_state) {
 
 	lua["warble"] = kaguya::NewTable();
 	kaguya::LuaTable t = lua["warble"];
-	double x = 0;
+	double v = 0;
 	for (auto _ : benchmark_state) {
-		t["value"] = x;
-		x += 3;
+		v += 3;
+		t["value"] = v;
 	}
+	double x = t["value"];
+	lbs::expect(benchmark_state, x, v);
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
 }
 
 void kaguya_table_chained_get_measure(benchmark::State& benchmark_state) {
@@ -101,14 +107,16 @@ void kaguya_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	lua["ulahibe"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"] = kaguya::NewTable();
-	lua["ulahibe"]["warble"]["value"] = 24;
-	double x = 0;
+	lua["ulahibe"]["warble"]["value"] = 3;
+	double v = 0;
 	for (auto _ : benchmark_state) {
-		lua["ulahibe"]["warble"]["value"] = x;
-		x += 3;
+		v += 3;
+		lua["ulahibe"]["warble"]["value"] = v;
 	}
-	double v = lua["ulahibe"]["warble"]["value"];
+	double x = lua["ulahibe"]["warble"]["value"];
 	lbs::expect(benchmark_state, x, v);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
 }
 
 void kaguya_c_function_measure(benchmark::State& benchmark_state) {
@@ -118,8 +126,10 @@ void kaguya_c_function_measure(benchmark::State& benchmark_state) {
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 	lua["f"].setFunction(lbs::basic_call);
 
-	std::string code = lbs::repeated_code("f(i)");
 
+	lbs::lua_bench_do_or_die(L, lbs::c_function_check);
+
+	std::string code = lbs::repeated_code(lbs::c_function_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -163,13 +173,15 @@ void kaguya_member_function_call_measure(benchmark::State& benchmark_state) {
 
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
-	lua["basic"].setClass<lbs::basic>(kaguya::UserdataMetatable<lbs::basic>()
-								    .setConstructors<lbs::basic()>()
-								    .addFunction("get", &lbs::basic::get)
-								    .addFunction("set", &lbs::basic::set));
-	lua("b = basic.new()");
-	std::string code = lbs::repeated_code("b:set(i) b:get()");
+	lua["c"].setClass<lbs::basic>(kaguya::UserdataMetatable<lbs::basic>()
+								.setConstructors<lbs::basic()>()
+								.addFunction("get", &lbs::basic::get)
+								.addFunction("set", &lbs::basic::set));
+	lua("b = c.new()");
 
+	lbs::lua_bench_do_or_die(L, lbs::member_function_call_check);
+
+	std::string code = lbs::repeated_code(lbs::member_function_call_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -235,7 +247,7 @@ void kaguya_base_derived_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
-	lua["complex_ab"].setClass(
+	lua["cab"].setClass(
 		kaguya::UserdataMetatable<lbs::complex_ab, kaguya::MultipleBase<lbs::complex_base_a, lbs::complex_base_b>>()
 			.setConstructors<lbs::complex_ab()>()
 			.addFunction("a_func", &lbs::complex_ab::a_func)
@@ -248,11 +260,11 @@ void kaguya_base_derived_measure(benchmark::State& benchmark_state) {
 		lbs::complex_base_a* va = lua["b"];
 		lbs::complex_base_b* vb = lua["b"];
 		if (va->a_func() != ab.a_func() || va->a != ab.a) {
-			lbs::unsupported(benchmark_state, "proper base class casting not provided: failing benchmark");
+			lbs::unsupported(benchmark_state, "unsupported: base class not found");
 			return;
 		}
 		if (vb->b_func() != ab.b_func() || vb->b != ab.b) {
-			lbs::unsupported(benchmark_state, "proper base class casting not provided: failing benchmark");
+			lbs::unsupported(benchmark_state, "unsupported: base class not found");
 			return;
 		}
 	}
@@ -272,8 +284,11 @@ void kaguya_return_userdata_measure(benchmark::State& benchmark_state) {
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
 	lua["f"].setFunction(lbs::basic_return);
-	std::string code = lbs::repeated_code("b = f(i)");
+	lua["h"].setFunction(lbs::basic_get);
 
+	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
+
+	std::string code = lbs::repeated_code(lbs::return_userdata_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -296,32 +311,33 @@ void kaguya_optional_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
 }
 
-void kaguya_implicit_inheritance_call_measure(benchmark::State& benchmark_state) {
+void kaguya_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua_State* L = lua.state();
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
-	lua["complex_base_a"].setClass(
+	lua["ca"].setClass(
 		kaguya::UserdataMetatable<lbs::complex_base_a>()
 			.setConstructors<lbs::complex_base_a()>()
 			.addFunction("a_func", &lbs::complex_base_a::a_func)
 			.addFunction("a", &lbs::complex_base_a::a));
 
-	lua["complex_base_b"].setClass(
+	lua["cb"].setClass(
 		kaguya::UserdataMetatable<lbs::complex_base_b>()
 			.setConstructors<lbs::complex_base_b()>()
 			.addFunction("b_func", &lbs::complex_base_b::b_func)
 			.addFunction("b", &lbs::complex_base_b::b));
 
-	lua["complex_ab"].setClass(
+	lua["cab"].setClass(
 		kaguya::UserdataMetatable<lbs::complex_ab, kaguya::MultipleBase<lbs::complex_base_a, lbs::complex_base_b>>()
 			.setConstructors<lbs::complex_ab()>()
 			.addFunction("ab_func", &lbs::complex_ab::ab_func)
 			.addFunction("ab", &lbs::complex_ab::ab));
 
-	lua("b = complex_ab.new()");
+	lua("b = cab.new()");
 
-	std::string code = lbs::repeated_code("b:b_func()");
+	lbs::lua_bench_do_or_die(L, lbs::implicit_inheritance_check);
 
+	std::string code = lbs::repeated_code(lbs::implicit_inheritance_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -348,4 +364,4 @@ BENCHMARK(kaguya_base_derived_measure);
 BENCHMARK(kaguya_base_derived_measure);
 BENCHMARK(kaguya_return_userdata_measure);
 BENCHMARK(kaguya_optional_measure);
-BENCHMARK(kaguya_implicit_inheritance_call_measure);
+BENCHMARK(kaguya_implicit_inheritance_measure);

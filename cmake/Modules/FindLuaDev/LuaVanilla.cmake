@@ -343,7 +343,7 @@ endif()
 
 # LuaC Compiler
 add_executable(${luacompiler} ${LUA_VANILLA_LUAC_SOURCES})
-if (BUILD_LUA_AS_DLL)
+if (lualib_target_type STREQUAL "SHARED_LIBRARY")
 	# TODO: figure out how to make DLL internal symbols for lua public so we don't have to do this
 	target_sources(${luacompiler} PRIVATE ${LUA_VANILLA_LIB_SOURCES})
 endif()

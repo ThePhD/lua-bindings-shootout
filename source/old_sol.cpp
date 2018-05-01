@@ -1,3 +1,25 @@
+// lua bindings shootout
+// The MIT License (MIT)
+
+// Copyright © 2018 ThePhD
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 #define SOL_NO_EXCEPTIONS 1
 #define SOL_NO_CHECK_NUMBER_PRECISION 1
 #include <old_sol/old_sol.hpp>
@@ -25,10 +47,11 @@ void old_sol_global_string_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		lua.set("value", v);
 		v += 3;
+		lua.set("value", v);
 	}
 	double x = lua["value"];
+	lbs::expect(benchmark_state, x, v);
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
 	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
 }
@@ -37,7 +60,7 @@ void old_sol_table_get_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
-	lua.script("warble = { value = 24 }");
+	lua.script("warble = { value = 3 }");
 	old_sol::table t = lua["warble"].get<old_sol::table>();
 
 	double x = 0;
@@ -57,10 +80,11 @@ void old_sol_table_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		t.set("value", v);
 		v += 3;
+		t.set("value", v);
 	}
 	double x = t["value"];
+	lbs::expect(benchmark_state, x, v);
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
 	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
 }
@@ -69,7 +93,7 @@ void old_sol_table_chained_get_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
-	lua.script("ulahibe = { warble = { value = 24 } }");
+	lua.script("ulahibe = { warble = { value = 3 } }");
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -87,22 +111,26 @@ void old_sol_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		lua["ulahibe"].get<old_sol::table>()["warble"].get<old_sol::table>()["value"] = v;
 		v += 3;
+		lua["ulahibe"].get<old_sol::table>()["warble"].get<old_sol::table>()["value"] = v;
 	}
 	double x = lua["ulahibe"].get<old_sol::table>()["warble"].get<old_sol::table>()["value"].get<double>();
+	lbs::expect(benchmark_state, x, v);
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
 	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
 }
 
 void old_sol_c_function_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
+	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 	lua_State* L = lua.lua_state();
 
 	lua.set_function("f", &lbs::basic_call);
-	std::string code = lbs::repeated_code("f(i)");
 
+	lbs::lua_bench_do_or_die(L, lbs::c_function_check);
+
+	std::string code = lbs::repeated_code(lbs::c_function_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -143,15 +171,18 @@ void old_sol_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 
 void old_sol_member_function_call_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
+	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
-
 	lua_State* L = lua.lua_state();
-	lua.new_usertype<lbs::basic>("lbs::basic",
+
+	lua.new_usertype<lbs::basic>("c",
 		"get", &lbs::basic::get,
 		"set", &lbs::basic::set);
-	lua.script("b = lbs::basic:new()");
-	std::string code = lbs::repeated_code("b:set(i) b:get()");
+	lua.script("b = c:new()");
 
+	lbs::lua_bench_do_or_die(L, lbs::member_function_call_check);
+
+	std::string code = lbs::repeated_code(lbs::member_function_call_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -161,16 +192,17 @@ void old_sol_member_function_call_measure(benchmark::State& benchmark_state) {
 
 void old_sol_userdata_variable_access_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
+	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
-
 	lua_State* L = lua.lua_state();
 
-	lua.new_usertype<lbs::basic>("basic",
+	lua.new_usertype<lbs::basic>("c",
 		"var", &lbs::basic::var);
-	lua.script("b = basic:new()");
-	std::string code = lbs::repeated_code(
-		lbs::userdata_variable_access_code);
+	lua.script("b = c:new()");
 
+	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_check);
+
+	std::string code = lbs::repeated_code(lbs::userdata_variable_access_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -180,11 +212,12 @@ void old_sol_userdata_variable_access_measure(benchmark::State& benchmark_state)
 
 void old_sol_userdata_variable_access_large_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
+	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
 	lua_State* L = lua.lua_state();
 
-	lua.new_usertype<lbs::basic_large>("basic",
+	lua.new_usertype<lbs::basic_large>("c",
 		"var", &lbs::basic_large::var,
 		"var0", &lbs::basic_large::var0,
 		"var1", &lbs::basic_large::var1,
@@ -237,10 +270,11 @@ void old_sol_userdata_variable_access_large_measure(benchmark::State& benchmark_
 		"var48", &lbs::basic_large::var48,
 		"var49", &lbs::basic_large::var49);
 
-	lua.script("b = basic:new()");
-	std::string code = lbs::repeated_code(
-		lbs::userdata_variable_access_large_code);
+	lua.script("b = c:new()");
 
+	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_check);
+
+	std::string code = lbs::repeated_code(lbs::userdata_variable_access_large_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -250,10 +284,11 @@ void old_sol_userdata_variable_access_large_measure(benchmark::State& benchmark_
 
 void old_sol_userdata_variable_access_last_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
+	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
 	lua_State* L = lua.lua_state();
-	lua.new_usertype<lbs::basic_large>("lbs::basic_large",
+	lua.new_usertype<lbs::basic_large>("c",
 		"var", &lbs::basic_large::var,
 		"var0", &lbs::basic_large::var0,
 		"var1", &lbs::basic_large::var1,
@@ -306,9 +341,11 @@ void old_sol_userdata_variable_access_last_measure(benchmark::State& benchmark_s
 		"var48", &lbs::basic_large::var48,
 		"var49", &lbs::basic_large::var49);
 
-	lua.script("b = basic_large:new()");
-	std::string code = lbs::repeated_code(lbs::userdata_variable_access_large_last_code);
+	lua.script("b = c:new()");
 
+	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_last_check);
+
+	std::string code = lbs::repeated_code(lbs::userdata_variable_access_large_last_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -343,7 +380,7 @@ void old_sol_multi_return_measure(benchmark::State& benchmark_state) {
 		x += static_cast<int>(std::get<0>(v));
 		x += static_cast<int>(std::get<1>(v));
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 6);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
 }
 
 void old_sol_base_derived_measure(benchmark::State& benchmark_state) {
@@ -356,9 +393,10 @@ void old_sol_optional_measure(benchmark::State& benchmark_state) {
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		old_sol::table o1 = lua["warble"];
+		old_sol::object o1 = lua["warble"];
 		if (o1.get_type() == old_sol::type::table) {
-			old_sol::object o2 = o1["value"];
+			old_sol::table t1 = o1.as<old_sol::table>();
+			old_sol::object o2 = t1["value"];
 			if (o2.get_type() == old_sol::type::number) {
 				x += o2.as<double>();
 				continue;
@@ -371,12 +409,16 @@ void old_sol_optional_measure(benchmark::State& benchmark_state) {
 
 void old_sol_return_userdata_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
+	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 	lua_State* L = lua.lua_state();
 
 	lua.set_function("f", lbs::basic_return);
-	std::string code = lbs::repeated_code("b = f(i)");
+	lua.set_function("h", lbs::basic_get);
 
+	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
+
+	std::string code = lbs::repeated_code(lbs::return_userdata_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -384,7 +426,7 @@ void old_sol_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void old_sol_implicit_inheritance_call_measure(benchmark::State& benchmark_state) {
+void old_sol_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::unsupported(benchmark_state);
 }
 
@@ -404,7 +446,6 @@ BENCHMARK(old_sol_userdata_variable_access_last_measure);
 BENCHMARK(old_sol_multi_return_measure);
 BENCHMARK(old_sol_stateful_function_object_measure);
 BENCHMARK(old_sol_base_derived_measure);
-BENCHMARK(old_sol_base_derived_measure);
 BENCHMARK(old_sol_return_userdata_measure);
 BENCHMARK(old_sol_optional_measure);
-BENCHMARK(old_sol_implicit_inheritance_call_measure);
+BENCHMARK(old_sol_implicit_inheritance_measure);
