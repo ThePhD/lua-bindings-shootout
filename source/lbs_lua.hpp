@@ -469,7 +469,7 @@ namespace lbs {
 	const std::string return_userdata_check = "b = f(46705) x = h(b) assert(x == 46705)";
 	const std::string return_userdata_code = "b = f(i)";
 
-	const std::string implicit_inheritance_check = "x = b:b_func() assert(x == 3)";
+	const std::string implicit_inheritance_check = "x = b:b_func() assert(x == " + magic_value_string() + ")";
 	const std::string implicit_inheritance_code = "b:b_func()";
 
 	const std::string stateful_call_check = "x = f(670384) assert(x == 670384)";
@@ -480,6 +480,16 @@ namespace lbs {
 
 	const std::string member_function_call_check = "b:set(56921) x = b:get() assert(x == 56921)";
 	const std::string member_function_call_code = "b:set(i) x = b:get()";
+
+	inline bool verify_base_correctness(complex_base_a& va, complex_base_b& vb, complex_ab& ab) {
+		if (va.a_func() != ab.a_func() || va.a != ab.a) {
+			return false;
+		}
+		if (vb.b_func() != ab.b_func() || vb.b != ab.b) {
+			return false;
+		}
+		return true;
+	}
 } // namespace lbs
 
 #endif // LUA_BINDINGS_SHOOTOUT_LUA_HPP

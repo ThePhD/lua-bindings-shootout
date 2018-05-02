@@ -30,13 +30,13 @@ void kaguya_global_string_get_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
-	lua["value"] = 3;
+	lua["value"] = lbs::magic_value();
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_global_string_set_measure(benchmark::State& benchmark_state) {
@@ -45,13 +45,13 @@ void kaguya_global_string_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["value"] = v;
 	}
 	double x = lua["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_table_get_measure(benchmark::State& benchmark_state) {
@@ -59,14 +59,14 @@ void kaguya_table_get_measure(benchmark::State& benchmark_state) {
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
 	lua["warble"] = kaguya::NewTable();
-	lua["warble"]["value"] = 3;
+	lua["warble"]["value"] = lbs::magic_value();
 	kaguya::LuaTable t = lua["warble"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = t["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_table_set_measure(benchmark::State& benchmark_state) {
@@ -77,13 +77,13 @@ void kaguya_table_set_measure(benchmark::State& benchmark_state) {
 	kaguya::LuaTable t = lua["warble"];
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		t["value"] = v;
 	}
 	double x = t["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_table_chained_get_measure(benchmark::State& benchmark_state) {
@@ -92,13 +92,13 @@ void kaguya_table_chained_get_measure(benchmark::State& benchmark_state) {
 
 	lua["ulahibe"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"] = kaguya::NewTable();
-	lua["ulahibe"]["warble"]["value"] = 3;
+	lua["ulahibe"]["warble"]["value"] = lbs::magic_value();
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["ulahibe"]["warble"]["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_table_chained_set_measure(benchmark::State& benchmark_state) {
@@ -107,16 +107,16 @@ void kaguya_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	lua["ulahibe"] = kaguya::NewTable();
 	lua["ulahibe"]["warble"] = kaguya::NewTable();
-	lua["ulahibe"]["warble"]["value"] = 3;
+	lua["ulahibe"]["warble"]["value"] = lbs::magic_value();
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["ulahibe"]["warble"]["value"] = v;
 	}
 	double x = lua["ulahibe"]["warble"]["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_c_function_measure(benchmark::State& benchmark_state) {
@@ -147,10 +147,10 @@ void kaguya_lua_function_measure(benchmark::State& benchmark_state) {
 	kaguya::LuaFunction f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -161,10 +161,10 @@ void kaguya_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 	kaguya::LuaFunction f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -221,10 +221,10 @@ void kaguya_stateful_function_object_measure(benchmark::State& benchmark_state) 
 	kaguya::LuaFunction f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void kaguya_multi_return_measure(benchmark::State& benchmark_state) {
@@ -236,11 +236,11 @@ void kaguya_multi_return_measure(benchmark::State& benchmark_state) {
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double a, b;
-		kaguya::tie(a, b) = f(3);
+		kaguya::tie(a, b) = f(lbs::magic_value());
 		x += a;
 		x += b;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
 void kaguya_base_derived_measure(benchmark::State& benchmark_state) {
@@ -259,12 +259,8 @@ void kaguya_base_derived_measure(benchmark::State& benchmark_state) {
 	{
 		lbs::complex_base_a* va = lua["b"];
 		lbs::complex_base_b* vb = lua["b"];
-		if (va->a_func() != ab.a_func() || va->a != ab.a) {
-			lbs::unsupported(benchmark_state, "unsupported: base class not found");
-			return;
-		}
-		if (vb->b_func() != ab.b_func() || vb->b != ab.b) {
-			lbs::unsupported(benchmark_state, "unsupported: base class not found");
+		if (lbs::verify_base_correctness(*va, *vb, ab)) {
+			lbs::unsupported(benchmark_state);
 			return;
 		}
 	}
@@ -275,7 +271,7 @@ void kaguya_base_derived_measure(benchmark::State& benchmark_state) {
 		x += va->a_func();
 		x += vb->b_func();
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 6);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 2));
 }
 
 void kaguya_return_userdata_measure(benchmark::State& benchmark_state) {

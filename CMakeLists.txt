@@ -95,16 +95,16 @@ set(lua_bindings_shootout_sources
 
 	"source/lua-api-pp.cpp"
 	
-	#"source/oolua.cpp"
-	#"source/luabridge.cpp"
-	#"source/lua-intf.cpp"
-	#"source/luwra.cpp"
-	#"source/plain_c.cpp"
-	#"source/selene.cpp"
-	#"source/kaguya.cpp"
-	#"source/old_sol.cpp"
-	#"source/sol2.cpp"
-	#"source/sol3.cpp"
+	"source/oolua.cpp"
+	"source/luabridge.cpp"
+	"source/lua-intf.cpp"
+	"source/luwra.cpp"
+	"source/plain_c.cpp"
+	"source/selene.cpp"
+	"source/kaguya.cpp"
+	"source/old_sol.cpp"
+	"source/sol2.cpp"
+	"source/sol3.cpp"
 
 	"source/lua_bindings_shootout.cpp"
 )
@@ -116,14 +116,14 @@ target_link_libraries(lua_bindings_shootout
 	${LUA_LIBRARIES}
 	# binding libraries
 	${LUAAPIPP_LIBRARIES}
-	#${LUABRIDGE_LIBRARIES}
-	#${KAGUYA_LIBRARIES}
-	#${SELENE_LIBRARIES}
-	#${LUWRA_LIBRARIES}
-	#${LUAINTF_LIBRARIES}
-	#${TOLUAPP_LIBRARIES}
-	#${OOLUA_LIBRARIES}
-	#sol2
+	${LUABRIDGE_LIBRARIES}
+	${KAGUYA_LIBRARIES}
+	${SELENE_LIBRARIES}
+	${LUWRA_LIBRARIES}
+	${LUAINTF_LIBRARIES}
+	${TOLUAPP_LIBRARIES}
+	${OOLUA_LIBRARIES}
+	sol2
 	# benchmarking library and utilities
 	Threads::Threads
 	benchmark

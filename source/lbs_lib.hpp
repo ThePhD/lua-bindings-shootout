@@ -5,6 +5,16 @@
 
 namespace lbs {
 
+	inline int magic_value() {
+		static const int v = 3;
+		return v;
+	}
+
+	inline const std::string& magic_value_string() {
+		static const std::string v = std::to_string(magic_value());
+		return v;
+	}
+
 	struct basic {
 		double var = 499;
 		int var0 = 501;
@@ -91,7 +101,7 @@ namespace lbs {
 	};
 
 	struct complex_base_a {
-		double a = 1;
+		double a = lbs::magic_value() - 2;
 
 		virtual double a_func() const {
 			return a;
@@ -99,7 +109,7 @@ namespace lbs {
 	};
 
 	struct complex_base_b {
-		double b = 2;
+		double b = lbs::magic_value() - 1;
 
 		virtual double b_func() const {
 			return b;
@@ -107,7 +117,7 @@ namespace lbs {
 	};
 
 	struct complex_ab : complex_base_a, complex_base_b {
-		double ab = 3;
+		double ab = lbs::magic_value();
 
 		virtual double a_func() const override {
 			return ab;

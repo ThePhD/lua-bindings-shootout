@@ -29,91 +29,103 @@
 void lua_intf_global_string_get_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
-
-	lua.doString("value = 3");
+	
+	std::string precode = "value = " + lbs::magic_value_string();
+	lua.doString(precode.c_str());
+	
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua.getGlobal<double>("value");
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_global_string_set_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.doString("value = 3");
+	std::string precode = "value = " + lbs::magic_value_string();
+	lua.doString(precode.c_str());
+
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua.setGlobal("value", v);
 	}
 	double x = lua.getGlobal<double>("value");
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_table_chained_get_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.doString("ulahibe = {warble = {value = 3}}");
+	std::string precode = "ulahibe = {warble = {value = " + lbs::magic_value_string() + "}}";
+	lua.doString(precode.c_str());
+	
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua.getGlobal<double>("ulahibe.warble.value");
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_table_chained_set_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.doString("ulahibe = {warble = {value = 3}}");
+	std::string precode = "ulahibe = {warble = {value = " + lbs::magic_value_string() + "}}";
+	lua.doString(precode.c_str());
+
 	double v = 0;
 	for (auto _ : benchmark_state) {
 		LuaIntf::LuaRef tu = lua.getGlobal("ulahibe")["warble"];
-		v += 3;
+		v += lbs::magic_value();
 		tu.set("value", v);
 	}
 	double x = lua.getGlobal<double>("ulahibe.warble.value");
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_table_get_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.doString("warble = {value = 3}");
+	std::string code = "warble = {value = " + lbs::magic_value_string() + "}";
+	lua.doString(code.c_str());
+
 	LuaIntf::LuaRef t = lua.getGlobal("warble");
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = t.get<double>("value");
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_table_set_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.doString("warble = {value = 3}");
+	std::string precode = "warble = {value = " + lbs::magic_value_string() + "}";
+	lua.doString(precode.c_str());
+
 	LuaIntf::LuaRef t = lua.getGlobal("warble");
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		t.set("value", v);
 	}
 	double x = lua.getGlobal<double>("warble.value");
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_c_function_measure(benchmark::State& benchmark_state) {
@@ -141,7 +153,7 @@ void lua_intf_lua_function_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaRef f = lua.getGlobal("f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f.call<double>(3);
+		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
 }
@@ -154,10 +166,10 @@ void lua_intf_c_through_lua_function_measure(benchmark::State& benchmark_state) 
 	LuaIntf::LuaRef f = lua.getGlobal("f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f.call<double>(3);
+		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -215,7 +227,7 @@ void lua_intf_userdata_variable_access_large_measure(benchmark::State& benchmark
 	lua_atpanic(L, lbs::panic_throw);
 
 	LuaIntf::LuaBinding(lua)
-		.beginClass<lbs::basic_large>("c")
+		.beginClass<lbs::basic_large>("cl")
 		.addConstructor(LUA_ARGS())
 		.addVariable("var", &lbs::basic_large::var)
 		.addVariable("var0", &lbs::basic_large::var0)
@@ -270,7 +282,7 @@ void lua_intf_userdata_variable_access_large_measure(benchmark::State& benchmark
 		.addVariable("var49", &lbs::basic_large::var49)
 		.endClass();
 
-	lua.doString("b = c()");
+	lua.doString("b = cl()");
 	auto code = lbs::repeated_code(
 		lbs::userdata_variable_access_large_code);
 
@@ -287,7 +299,7 @@ void lua_intf_userdata_variable_access_last_measure(benchmark::State& benchmark_
 	lua_atpanic(L, lbs::panic_throw);
 
 	LuaIntf::LuaBinding(lua)
-		.beginClass<lbs::basic_large>("c")
+		.beginClass<lbs::basic_large>("cl")
 		.addConstructor(LUA_ARGS())
 		.addVariable("var", &lbs::basic_large::var)
 		.addVariable("var0", &lbs::basic_large::var0)
@@ -342,7 +354,7 @@ void lua_intf_userdata_variable_access_last_measure(benchmark::State& benchmark_
 		.addVariable("var49", &lbs::basic_large::var49)
 		.endClass();
 
-	lua.doString("b = c()");
+	lua.doString("b = cl()");
 	auto code = lbs::repeated_code(
 		lbs::userdata_variable_access_large_last_code);
 
@@ -362,10 +374,10 @@ void lua_intf_stateful_function_object_measure(benchmark::State& benchmark_state
 	LuaIntf::LuaRef f = lua.getGlobal("f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f.call<double>(3);
+		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_multi_return_measure(benchmark::State& benchmark_state) {
@@ -376,11 +388,11 @@ void lua_intf_multi_return_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaRef f = lua.getGlobal("f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		std::tuple<double, double> v = f.call<std::tuple<double, double>>(3);
+		std::tuple<double, double> v = f.call<std::tuple<double, double>>(lbs::magic_value());
 		x += std::get<0>(v);
 		x += std::get<1>(v);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
 void lua_intf_base_derived_measure(benchmark::State& benchmark_state) {
@@ -388,8 +400,7 @@ void lua_intf_base_derived_measure(benchmark::State& benchmark_state) {
 	// It seems like lua_intf has no facilities for base casting
 	// from a derived stored in Lua
 	lbs::unsupported(benchmark_state);
-	//for (auto _ : benchmark_state) {
-	//}
+	return;
 }
 
 void lua_intf_return_userdata_measure(benchmark::State& benchmark_state) {
@@ -462,7 +473,7 @@ void lua_intf_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	{
 		lua.doString("a = b:b_func()");
 		double value = lua.getGlobal<double>("a");
-		if (value != 3) {
+		if (value != lbs::magic_value()) {
 			lbs::unsupported(benchmark_state);
 			return;
 		}

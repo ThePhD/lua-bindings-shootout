@@ -35,7 +35,7 @@ void luabridge_global_string_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
 
-	std::string precode = "value = 3";
+	std::string precode = "value = " + lbs::magic_value_string();
 	lbs::lua_bench_do_or_die(L, precode);
 
 	double x = 0;
@@ -43,86 +43,86 @@ void luabridge_global_string_get_measure(benchmark::State& benchmark_state) {
 		double v = luabridge::getGlobal(L, "value");
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_global_string_set_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
 
-	lbs::lua_bench_do_or_die(L, "value = 3");
+	lbs::lua_bench_do_or_die(L, "value = " + lbs::magic_value_string());
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		luabridge::setGlobal(L, v, "value");
 	}
 	double x = luabridge::getGlobal(L, "value");
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_table_chained_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
 
-	lbs::lua_bench_do_or_die(L, "ulahibe = {warble = {value = 3}}");
+	lbs::lua_bench_do_or_die(L, "ulahibe = {warble = {value = " + lbs::magic_value_string() + "}}");
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		luabridge::LuaRef tw = luabridge::getGlobal(L, "ulahibe")["warble"];
 		double v = tw["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_table_chained_set_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
 
-	lbs::lua_bench_do_or_die(L, "ulahibe = {warble = {value = 3}}");
+	lbs::lua_bench_do_or_die(L, "ulahibe = {warble = {value = " + lbs::magic_value_string() + "}}");
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		luabridge::LuaRef tw = luabridge::getGlobal(L, "ulahibe")["warble"];
 		tw["value"] = v;
 	}
 	luabridge::LuaRef tw = luabridge::getGlobal(L, "ulahibe")["warble"];
 	double x = tw["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_table_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
 
-	lbs::lua_bench_do_or_die(L, "warble = {value = 3}");
+	lbs::lua_bench_do_or_die(L, "warble = {value = " + lbs::magic_value_string() + "}");
 	luabridge::LuaRef t = luabridge::getGlobal(L, "warble");
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = t["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_table_set_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
 
-	lbs::lua_bench_do_or_die(L, "warble = {value = 3}");
+	lbs::lua_bench_do_or_die(L, "warble = {value = " + lbs::magic_value_string() + "}");
 	luabridge::LuaRef t = luabridge::getGlobal(L, "warble");
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		t["value"] = v;
 	}
 	double x = luabridge::getGlobal(L, "warble")["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_c_function_measure(benchmark::State& benchmark_state) {
@@ -150,10 +150,10 @@ void luabridge_lua_function_measure(benchmark::State& benchmark_state) {
 	luabridge::LuaRef f = luabridge::getGlobal(L, "f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -166,10 +166,10 @@ void luabridge_c_through_lua_function_measure(benchmark::State& benchmark_state)
 	luabridge::LuaRef f = luabridge::getGlobal(L, "f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luabridge_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -232,7 +232,7 @@ void luabridge_userdata_variable_access_large_measure(benchmark::State& benchmar
 	lua_State* L = lua.get();
 
 	luabridge::getGlobalNamespace(L)
-		.beginClass<lbs::basic_large>("c")
+		.beginClass<lbs::basic_large>("cl")
 		.addConstructor<lbs::basic_large (*)()>()
 		.addData("var", &lbs::basic_large::var)
 		.addData("var0", &lbs::basic_large::var0)
@@ -287,7 +287,7 @@ void luabridge_userdata_variable_access_large_measure(benchmark::State& benchmar
 		.addData("var49", &lbs::basic_large::var49)
 		.endClass();
 
-	lbs::lua_bench_do_or_die(L, "b = c()");
+	lbs::lua_bench_do_or_die(L, "b = cl()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_check);
 
@@ -309,7 +309,7 @@ void luabridge_userdata_variable_access_last_measure(benchmark::State& benchmark
 	lua_State* L = lua.get();
 
 	luabridge::getGlobalNamespace(L)
-		.beginClass<lbs::basic_large>("c")
+		.beginClass<lbs::basic_large>("cl")
 		.addConstructor<lbs::basic_large (*)()>()
 		.addData("var", &lbs::basic_large::var)
 		.addData("var0", &lbs::basic_large::var0)
@@ -364,7 +364,7 @@ void luabridge_userdata_variable_access_last_measure(benchmark::State& benchmark
 		.addData("var49", &lbs::basic_large::var49)
 		.endClass();
 
-	lbs::lua_bench_do_or_die(L, "b = c()");
+	lbs::lua_bench_do_or_die(L, "b = cl()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_last_check);
 
@@ -387,12 +387,12 @@ void luabridge_stateful_function_object_measure(benchmark::State& benchmark_stat
 	lua_State* L = lua.get();
 
 	luabridge::getGlobalNamespace(L)
-		.beginClass<lbs::basic_stateful>("c")
+		.beginClass<lbs::basic_stateful>("cs")
 		.endClass();
 	luabridge::LuaRef f = luabridge::getGlobal(L, "f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
 }
@@ -410,11 +410,11 @@ void luabridge_multi_return_measure(benchmark::State& benchmark_state) {
 	luabridge::LuaRef f = luabridge::getGlobal(L, "f");
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		std::tuple<double, double> v = f(3);
+		std::tuple<double, double> v = f(lbs::magic_value());
 		x += std::get<0>(v);
 		x += std::get<1>(v);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 	*/
 }
 
@@ -488,7 +488,7 @@ void luabridge_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	{
 		lbs::lua_bench_do_or_die(L, "a = b:b_func()");
 		double value = luabridge::getGlobal(L, "a");
-		if (value != 3) {
+		if (value != lbs::magic_value()) {
 			lbs::unsupported(benchmark_state);
 			return;
 		}

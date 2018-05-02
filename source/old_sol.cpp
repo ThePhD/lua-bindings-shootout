@@ -32,13 +32,13 @@ void old_sol_global_string_get_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
-	lua["value"] = 3;
+	lua["value"] = lbs::magic_value();
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_global_string_set_measure(benchmark::State& benchmark_state) {
@@ -47,20 +47,20 @@ void old_sol_global_string_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua.set("value", v);
 	}
 	double x = lua["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_table_get_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
-	lua.script("warble = { value = 3 }");
+	lua.script("warble = { value = " + lbs::magic_value_string() + " }");
 	old_sol::table t = lua["warble"].get<old_sol::table>();
 
 	double x = 0;
@@ -68,7 +68,7 @@ void old_sol_table_get_measure(benchmark::State& benchmark_state) {
 		double v = t["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_table_set_measure(benchmark::State& benchmark_state) {
@@ -80,27 +80,27 @@ void old_sol_table_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		t.set("value", v);
 	}
 	double x = t["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_table_chained_get_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
-	lua.script("ulahibe = { warble = { value = 3 } }");
+	lua.script("ulahibe = { warble = { value = " + lbs::magic_value_string() + " } }");
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["ulahibe"].get<old_sol::table>()["warble"].get<old_sol::table>()["value"].get<double>();
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_table_chained_set_measure(benchmark::State& benchmark_state) {
@@ -111,13 +111,13 @@ void old_sol_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["ulahibe"].get<old_sol::table>()["warble"].get<old_sol::table>()["value"] = v;
 	}
 	double x = lua["ulahibe"].get<old_sol::table>()["warble"].get<old_sol::table>()["value"].get<double>();
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_c_function_measure(benchmark::State& benchmark_state) {
@@ -149,10 +149,10 @@ void old_sol_lua_function_measure(benchmark::State& benchmark_state) {
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f.call<double>(3);
+		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -163,10 +163,10 @@ void old_sol_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 	old_sol::function f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f.call<double>(3);
+		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -217,7 +217,7 @@ void old_sol_userdata_variable_access_large_measure(benchmark::State& benchmark_
 
 	lua_State* L = lua.lua_state();
 
-	lua.new_usertype<lbs::basic_large>("c",
+	lua.new_usertype<lbs::basic_large>("cl",
 		"var", &lbs::basic_large::var,
 		"var0", &lbs::basic_large::var0,
 		"var1", &lbs::basic_large::var1,
@@ -270,7 +270,7 @@ void old_sol_userdata_variable_access_large_measure(benchmark::State& benchmark_
 		"var48", &lbs::basic_large::var48,
 		"var49", &lbs::basic_large::var49);
 
-	lua.script("b = c:new()");
+	lua.script("b = cl:new()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_check);
 
@@ -288,7 +288,7 @@ void old_sol_userdata_variable_access_last_measure(benchmark::State& benchmark_s
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
 	lua_State* L = lua.lua_state();
-	lua.new_usertype<lbs::basic_large>("c",
+	lua.new_usertype<lbs::basic_large>("cl",
 		"var", &lbs::basic_large::var,
 		"var0", &lbs::basic_large::var0,
 		"var1", &lbs::basic_large::var1,
@@ -341,7 +341,7 @@ void old_sol_userdata_variable_access_last_measure(benchmark::State& benchmark_s
 		"var48", &lbs::basic_large::var48,
 		"var49", &lbs::basic_large::var49);
 
-	lua.script("b = c:new()");
+	lua.script("b = cl:new()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_last_check);
 
@@ -361,10 +361,10 @@ void old_sol_stateful_function_object_measure(benchmark::State& benchmark_state)
 	old_sol::function f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f.call<double>(3);
+		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void old_sol_multi_return_measure(benchmark::State& benchmark_state) {
@@ -376,15 +376,17 @@ void old_sol_multi_return_measure(benchmark::State& benchmark_state) {
 	old_sol::function f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		std::tuple<double, double> v = f.call<double, double>(3);
+		std::tuple<double, double> v = f.call<double, double>(lbs::magic_value());
 		x += static_cast<int>(std::get<0>(v));
 		x += static_cast<int>(std::get<1>(v));
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
 void old_sol_base_derived_measure(benchmark::State& benchmark_state) {
+	// Unsupported
 	lbs::unsupported(benchmark_state);
+	return;
 }
 
 void old_sol_optional_measure(benchmark::State& benchmark_state) {

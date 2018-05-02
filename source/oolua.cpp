@@ -84,7 +84,6 @@ int oo_basic_multi_return(lua_State* vm) {
 }
 OOLUA_CFUNC(lbs::basic_return, oo_basic_return)
 
-static const double oolua_value = 3;
 static const std::string oolua_f = "f";
 static const std::string oolua_h = "h";
 
@@ -92,6 +91,7 @@ void oolua_global_string_get_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
+	int oolua_value = lbs::magic_value();
 	set_global(vm, "value", oolua_value);
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -99,25 +99,25 @@ void oolua_global_string_get_measure(benchmark::State& benchmark_state) {
 		get_global(vm, "value", v);
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_global_string_set_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
-
+	int oolua_value = lbs::magic_value();
 	set_global(vm, "value", oolua_value);
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += oolua_value;
+		v += lbs::magic_value();
 		set_global(vm, "value", v);
 	}
 	double x = 0;
 	get_global(vm, "value", x);
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_table_chained_get_measure(benchmark::State& benchmark_state) {
@@ -129,7 +129,7 @@ void oolua_table_chained_get_measure(benchmark::State& benchmark_state) {
 	set_global(vm, "ulahibe", tu);
 	Table tw = new_table(vm);
 	tu.set("warble", tw);
-	tw.set("value", oolua_value);
+	tw.set("value", lbs::magic_value());
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -141,7 +141,7 @@ void oolua_table_chained_get_measure(benchmark::State& benchmark_state) {
 		tw.at("value", v);
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_table_chained_set_measure(benchmark::State& benchmark_state) {
@@ -157,7 +157,7 @@ void oolua_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += oolua_value;
+		v += lbs::magic_value();
 		Table tw;
 		Table tu;
 		get_global(vm, "ulahibe", tu);
@@ -167,8 +167,8 @@ void oolua_table_chained_set_measure(benchmark::State& benchmark_state) {
 	double x = 0;
 	tw.at("value", x);
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_table_get_measure(benchmark::State& benchmark_state) {
@@ -180,7 +180,7 @@ void oolua_table_get_measure(benchmark::State& benchmark_state) {
 	set_global(vm, "warble", tu);
 	Table tw;
 	get_global(vm, "warble", tw);
-	tw.set("value", oolua_value);
+	tw.set("value", lbs::magic_value());
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -188,7 +188,7 @@ void oolua_table_get_measure(benchmark::State& benchmark_state) {
 		tw.at("value", v);
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_table_set_measure(benchmark::State& benchmark_state) {
@@ -203,14 +203,14 @@ void oolua_table_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += oolua_value;
+		v += lbs::magic_value();
 		tw.set("value", v);
 	}
 	double x = 0;
 	tw.at("value", x);
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_c_function_measure(benchmark::State& benchmark_state) {
@@ -243,12 +243,12 @@ void oolua_lua_function_measure(benchmark::State& benchmark_state) {
 	Lua_function f(vm);
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		bool success = f(oolua_f, oolua_value);
+		bool success = f(oolua_f, lbs::magic_value());
 		double v = 0;
 		pull(vm, v);
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -260,12 +260,12 @@ void oolua_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 	Lua_function f(vm);
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		bool success = f(oolua_f, oolua_value);
+		bool success = f(oolua_f, lbs::magic_value());
 		double v = 0;
 		pull(vm, v);
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -376,12 +376,12 @@ void oolua_stateful_function_object_measure(benchmark::State& benchmark_state) {
 	for (auto _ : benchmark_state) {
 		// fails here: cannot bind an
 		// operator() to the "__mul" methods?
-		bool success = f(oolua_f, oolua_value);
+		bool success = f(oolua_f, lbs::magic_value());
 		double v;
 		pull(vm, v);
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * oolua_value);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void oolua_multi_return_measure(benchmark::State& benchmark_state) {
@@ -393,14 +393,14 @@ void oolua_multi_return_measure(benchmark::State& benchmark_state) {
 	Lua_function f(vm);
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		bool success = f(oolua_f, oolua_value);
+		bool success = f(oolua_f, lbs::magic_value());
 		double v = 0, w = 0;
 		pull(vm, v);
 		pull(vm, w);
 		x += v;
 		x += w;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (oolua_value * 3));
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * lbs::magic_value()));
 }
 
 void oolua_base_derived_measure(benchmark::State& benchmark_state) {

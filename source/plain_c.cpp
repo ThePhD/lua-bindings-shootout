@@ -30,7 +30,7 @@ void plain_c_global_string_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
 
-	lua_pushnumber(L, 3);
+	lua_pushnumber(L, lbs::magic_value());
 	lua_setglobal(L, "value");
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -39,7 +39,7 @@ void plain_c_global_string_get_measure(benchmark::State& benchmark_state) {
 		x += v;
 		lua_pop(L, 1);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_global_string_set_measure(benchmark::State& benchmark_state) {
@@ -48,7 +48,7 @@ void plain_c_global_string_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua_pushnumber(L, v);
 		lua_setglobal(L, "value");
 	}
@@ -56,8 +56,8 @@ void plain_c_global_string_set_measure(benchmark::State& benchmark_state) {
 	double x = lua_tonumber(L, -1);
 	lua_pop(L, 1);
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_table_get_measure(benchmark::State& benchmark_state) {
@@ -65,7 +65,7 @@ void plain_c_table_get_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.get();
 
 	lua_createtable(L, 0, 0);
-	lua_pushnumber(L, 3);
+	lua_pushnumber(L, lbs::magic_value());
 	lua_setfield(L, -2, "value");
 	lua_setglobal(L, "warble");
 
@@ -78,7 +78,7 @@ void plain_c_table_get_measure(benchmark::State& benchmark_state) {
 		lua_pop(L, 1);
 	}
 	lua_pop(L, 1);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_table_set_measure(benchmark::State& benchmark_state) {
@@ -86,14 +86,14 @@ void plain_c_table_set_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.get();
 
 	lua_createtable(L, 0, 0);
-	lua_pushnumber(L, 3);
+	lua_pushnumber(L, lbs::magic_value());
 	lua_setfield(L, -2, "value");
 	lua_setglobal(L, "warble");
 
 	lua_getglobal(L, "warble");
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua_pushnumber(L, v);
 		lua_setfield(L, -2, "value");
 	}
@@ -101,8 +101,8 @@ void plain_c_table_set_measure(benchmark::State& benchmark_state) {
 	double x = lua_tonumber(L, -1);
 	lua_pop(L, 2);
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_table_chained_get_measure(benchmark::State& benchmark_state) {
@@ -111,7 +111,7 @@ void plain_c_table_chained_get_measure(benchmark::State& benchmark_state) {
 
 	lua_createtable(L, 0, 0);
 	lua_createtable(L, 0, 0);
-	lua_pushnumber(L, 3);
+	lua_pushnumber(L, lbs::magic_value());
 	lua_setfield(L, -2, "value");
 	lua_setfield(L, -2, "warble");
 	lua_setglobal(L, "ulahibe");
@@ -124,7 +124,7 @@ void plain_c_table_chained_get_measure(benchmark::State& benchmark_state) {
 		x += v;
 		lua_pop(L, 3);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_table_chained_set_measure(benchmark::State& benchmark_state) {
@@ -133,13 +133,13 @@ void plain_c_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	lua_createtable(L, 0, 0);
 	lua_createtable(L, 0, 0);
-	lua_pushnumber(L, 3);
+	lua_pushnumber(L, lbs::magic_value());
 	lua_setfield(L, -2, "value");
 	lua_setfield(L, -2, "warble");
 	lua_setglobal(L, "ulahibe");
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua_getglobal(L, "ulahibe");
 		lua_getfield(L, -1, "warble");
 		lua_pushnumber(L, v);
@@ -152,8 +152,8 @@ void plain_c_table_chained_set_measure(benchmark::State& benchmark_state) {
 	double x = lua_tonumber(L, -1);
 	lua_pop(L, 3);
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_c_function_measure(benchmark::State& benchmark_state) {
@@ -182,7 +182,7 @@ void plain_c_lua_function_measure(benchmark::State& benchmark_state) {
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua_getglobal(L, "f");
-		lua_pushnumber(L, 3);
+		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		lua_pop(L, 1);
@@ -200,7 +200,7 @@ void plain_c_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua_getglobal(L, "f");
-		lua_pushnumber(L, 3);
+		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		x += v;
@@ -222,7 +222,7 @@ void plain_c_member_function_call_measure(benchmark::State& benchmark_state) {
 		{ "get", &lbs::basic_get_wrap },
 		{ nullptr, nullptr }
 	};
-	luaL_newmetatable(L, "struct_basic");
+	luaL_newmetatable(L, "c");
 	lua_createtable(L, 0, 0);
 	luaL_setfuncs(L, funcs, 0);
 	lua_setfield(L, -2, "__index");
@@ -251,7 +251,7 @@ void plain_c_userdata_variable_access_measure(benchmark::State& benchmark_state)
 		{ "__newindex", &lbs::basic_newindex_wrap },
 		{ nullptr, nullptr }
 	};
-	luaL_newmetatable(L, "struct_basic");
+	luaL_newmetatable(L, "c");
 	luaL_setfuncs(L, funcs, 0);
 	lua_setmetatable(L, -2);
 	lua_setglobal(L, "b");
@@ -278,7 +278,7 @@ void plain_c_userdata_variable_access_large_measure(benchmark::State& benchmark_
 		{ "__newindex", &lbs::basic_large_newindex_wrap },
 		{ nullptr, nullptr }
 	};
-	luaL_newmetatable(L, "struct_lbs::basic_large");
+	luaL_newmetatable(L, "cl");
 	luaL_setfuncs(L, funcs, 0);
 	lua_setmetatable(L, -2);
 	lua_setglobal(L, "b");
@@ -305,7 +305,7 @@ void plain_c_userdata_variable_access_last_measure(benchmark::State& benchmark_s
 		{ "__newindex", &lbs::basic_large_newindex_wrap },
 		{ nullptr, nullptr }
 	};
-	luaL_newmetatable(L, "struct_lbs::basic_large");
+	luaL_newmetatable(L, "cl");
 	luaL_setfuncs(L, funcs, 0);
 	lua_setmetatable(L, -2);
 	lua_setglobal(L, "b");
@@ -335,13 +335,13 @@ void plain_c_stateful_function_object_measure(benchmark::State& benchmark_state)
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua_getglobal(L, "f");
-		lua_pushnumber(L, 3);
+		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		x += v;
 		lua_pop(L, 1);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
@@ -354,7 +354,7 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua_getglobal(L, "f");
-		lua_pushnumber(L, 3);
+		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 2, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		double w = static_cast<double>(lua_tonumber(L, -2));
@@ -362,20 +362,41 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 		x += w;
 		lua_pop(L, 2);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
 void plain_c_base_derived_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
 
-	lbs::complex_ab* data = static_cast<lbs::complex_ab*>(lua_newuserdata(L, sizeof(lbs::complex_ab)));
-	new (data) lbs::complex_ab();
+	lbs::complex_ab* pab = static_cast<lbs::complex_ab*>(lua_newuserdata(L, sizeof(lbs::complex_ab)));
+	new (pab) lbs::complex_ab();
+	lbs::complex_ab& ab = *pab;
+	// ensure destruction no matter what
+	struct kill_me {
+		lbs::complex_ab& ab;
+
+		kill_me(lbs::complex_ab& ab_) : ab(ab_) {}
+		~kill_me() {
+			ab.~complex_ab();
+		}
+	} pls(ab);
+
 	lua_createtable(L, 0, 1);
 	lua_pushcclosure(L, &lbs::gc_wrap<lbs::complex_ab>, 0);
 	lua_setfield(L, -2, "__gc");
 	lua_setmetatable(L, -2);
 	lua_setglobal(L, "b");
+
+	{ // verify correctness
+		lua_getglobal(L, "b");
+		lbs::complex_base_a& va = *static_cast<lbs::complex_base_a*>(static_cast<lbs::complex_ab*>(lua_touserdata(L, -1)));
+		lbs::complex_base_b& vb = *static_cast<lbs::complex_base_b*>(static_cast<lbs::complex_ab*>(lua_touserdata(L, -1)));
+		lua_pop(L, 1);
+		if (!lbs::verify_base_correctness(va, vb, ab)) {
+			return;
+		}
+	}
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -388,8 +409,7 @@ void plain_c_base_derived_measure(benchmark::State& benchmark_state) {
 
 		lua_pop(L, 1);
 	}
-	data->~complex_ab();
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 6);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 2));
 }
 
 void plain_c_return_userdata_measure(benchmark::State& benchmark_state) {
@@ -444,7 +464,7 @@ void plain_c_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 		{ "__index", &lbs::complex_ab_index_wrap },
 		{ nullptr, nullptr }
 	};
-	luaL_newmetatable(L, "struct_complex_ab");
+	luaL_newmetatable(L, "cab");
 	luaL_setfuncs(L, funcs, 0);
 	lua_setmetatable(L, -2);
 	lua_setglobal(L, "b");

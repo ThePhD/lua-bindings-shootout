@@ -29,13 +29,13 @@
 void selene_global_string_get_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
-	lua["value"] = 3;
+	lua["value"] = lbs::magic_value();
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_global_string_set_measure(benchmark::State& benchmark_state) {
@@ -43,26 +43,26 @@ void selene_global_string_set_measure(benchmark::State& benchmark_state) {
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["value"] = v;
 	}
 	double x = lua["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_table_chained_get_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
-	lua["ulahibe"]["warble"]["value"] = 3;
+	lua["ulahibe"]["warble"]["value"] = lbs::magic_value();
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["ulahibe"]["warble"]["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_table_chained_set_measure(benchmark::State& benchmark_state) {
@@ -71,13 +71,13 @@ void selene_table_chained_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["ulahibe"]["warble"]["value"] = v;
 	}
 	double x = lua["ulahibe"]["warble"]["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_table_get_measure(benchmark::State& benchmark_state) {
@@ -85,13 +85,13 @@ void selene_table_get_measure(benchmark::State& benchmark_state) {
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
 	auto t = lua["warble"];
-	t["value"] = 3;
+	t["value"] = lbs::magic_value();
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = t["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_table_set_measure(benchmark::State& benchmark_state) {
@@ -101,13 +101,13 @@ void selene_table_set_measure(benchmark::State& benchmark_state) {
 	auto t = lua["value"];
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		t["warble"] = v;
 	}
 	double x = t["warble"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_c_function_measure(benchmark::State& benchmark_state) {
@@ -132,10 +132,10 @@ void selene_lua_function_measure(benchmark::State& benchmark_state) {
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -146,10 +146,10 @@ void selene_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 	sel::function<int(int)> f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -210,10 +210,10 @@ void selene_stateful_function_object_measure(benchmark::State& benchmark_state) 
 	sel::function<double(double)> f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void selene_multi_return_measure(benchmark::State& benchmark_state) {
@@ -224,11 +224,11 @@ void selene_multi_return_measure(benchmark::State& benchmark_state) {
 	sel::function<std::tuple<double, double>(double)> f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		std::tuple<double, double> v = f(3);
+		std::tuple<double, double> v = f(lbs::magic_value());
 		x += std::get<0>(v);
 		x += std::get<1>(v);
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
 void selene_base_derived_measure(benchmark::State& benchmark_state) {

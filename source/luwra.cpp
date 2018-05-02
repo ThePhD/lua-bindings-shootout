@@ -31,14 +31,14 @@ void luwra_global_string_get_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.state.get();
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua["value"] = 3;
+	lua["value"] = lbs::magic_value();
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_global_string_set_measure(benchmark::State& benchmark_state) {
@@ -48,13 +48,13 @@ void luwra_global_string_set_measure(benchmark::State& benchmark_state) {
 
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["value"] = v;
 	}
 	double x = lua["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_table_chained_get_measure(benchmark::State& benchmark_state) {
@@ -62,13 +62,15 @@ void luwra_table_chained_get_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.state.get();
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.runString("ulahibe={warble={value = 3}}");
+	std::string precode = "ulahibe={warble={value = " + lbs::magic_value_string() + "}}";
+	lua.runString(precode.c_str());
+
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["ulahibe"]["warble"]["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_table_chained_set_measure(benchmark::State& benchmark_state) {
@@ -76,16 +78,18 @@ void luwra_table_chained_set_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.state.get();
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.runString("ulahibe={warble={value = 3}}");
+	std::string precode = "ulahibe={warble={value = " + lbs::magic_value_string() + "}}";
+	lua.runString(precode.c_str());
+
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["ulahibe"]["warble"]["value"] = v;
 	}
 	double x = lua["ulahibe"]["warble"]["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_table_get_measure(benchmark::State& benchmark_state) {
@@ -93,13 +97,15 @@ void luwra_table_get_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.state.get();
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.runString("warble={value = 3}");
+	std::string precode = "warble={value = " + lbs::magic_value_string() + "}";
+	lua.runString(precode.c_str());
+	
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua["warble"]["value"];
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_table_set_measure(benchmark::State& benchmark_state) {
@@ -107,16 +113,18 @@ void luwra_table_set_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.state.get();
 	lua_atpanic(lua, lbs::panic_throw);
 
-	lua.runString("warble={value = 3}");
+	std::string precode = "warble={value = " + lbs::magic_value_string() + "}";
+	lua.runString(precode.c_str());
+
 	double v = 0;
 	for (auto _ : benchmark_state) {
-		v += 3;
+		v += lbs::magic_value();
 		lua["warble"]["value"] = v;
 	}
 	double x = lua["warble"]["value"];
 	lbs::expect(benchmark_state, x, v);
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
-	lbs::expect(benchmark_state, v, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+	lbs::expect(benchmark_state, v, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_c_function_measure(benchmark::State& benchmark_state) {
@@ -150,10 +158,10 @@ void luwra_lua_function_measure(benchmark::State& benchmark_state) {
 	luwra::Function<double> f = lua["f"].read<luwra::Function<double>>();
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -170,10 +178,10 @@ void luwra_c_through_lua_function_measure(benchmark::State& benchmark_state) {
 	luwra::Function<double> f = lua["f"].read<luwra::Function<double>>();
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -234,7 +242,7 @@ void luwra_stateful_function_object_measure(benchmark::State& benchmark_state) {
 
 	// Have to register as a usertype to get it.
 	lua.registerUserType<lbs::basic_stateful()>(
-		"c",
+		"cs",
 		{},
 		{ { "__call", LUWRA_WRAP_MEMBER(lbs::basic_stateful, operator()) } });
 	lua.set("f", lbs::basic_stateful());
@@ -245,10 +253,10 @@ void luwra_stateful_function_object_measure(benchmark::State& benchmark_state) {
 	luwra::Function<int> f = lua["f"].read<luwra::Function<int>>();
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		double v = f(3);
+		double v = f(lbs::magic_value());
 		x += v;
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 3);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void luwra_multi_return_measure(benchmark::State& benchmark_state) {
@@ -272,11 +280,11 @@ void luwra_multi_return_measure(benchmark::State& benchmark_state) {
 	luwra::Function<std::tuple<double, double>> f = lua["f"].read<luwra::Function<std::tuple<double, double>>>();
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		std::tuple<double, double> v = f(3);
+		std::tuple<double, double> v = f(lbs::magic_value());
 		x += static_cast<double>(std::get<0>(v));
 		x += static_cast<double>(std::get<1>(v));
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 9);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
 void luwra_base_derived_measure(benchmark::State& benchmark_state) {
@@ -298,11 +306,7 @@ void luwra_base_derived_measure(benchmark::State& benchmark_state) {
 	{
 		lbs::complex_base_a& va = lua["b"].read<lbs::complex_base_a>();
 		lbs::complex_base_b& vb = lua["b"].read<lbs::complex_base_b>();
-		if (va.a_func() != ab.a_func() || va.a != ab.a) {
-			lbs::unsupported(benchmark_state);
-			return;
-		}
-		if (vb.b_func() != ab.b_func() || vb.b != ab.b) {
+		if (!lbs::verify_base_correctness(va, vb, ab)) {
 			lbs::unsupported(benchmark_state);
 			return;
 		}
@@ -314,7 +318,7 @@ void luwra_base_derived_measure(benchmark::State& benchmark_state) {
 		x += va.a_func();
 		x += vb.b_func();
 	}
-	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 6);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 2));
 }
 
 void luwra_return_userdata_measure(benchmark::State& benchmark_state) {

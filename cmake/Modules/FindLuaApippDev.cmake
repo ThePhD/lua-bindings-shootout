@@ -64,9 +64,14 @@ set(luaapipp_lib luaapipp_lib_${luaapipp_version})
 add_library(${luaapipp_lib} INTERFACE)
 add_dependencies(${luaapipp_lib} LUAAPIPP_DEV_SOURCE)
 target_include_directories(${luaapipp_lib}
-	INTERFACE ${luaapipp_include_dirs})
-target_link_libraries(${luaapipp_lib} INTERFACE ${LUA_LIBRARIES})
-
+	INTERFACE ${luaapipp_include_dirs}
+)
+target_link_libraries(${luaapipp_lib} 
+	INTERFACE ${LUA_LIBRARIES}
+)
+target_compile_definitions(${luaapipp_lib} 
+	INTERFACE "LUAPP_HEADER_ONLY=1"
+)
 # # Variables required by LuaApipp
 set(LUAAPIPP_LIBRARIES ${luaapipp_lib})
 set(LUAAPIPP_INCLUDE_DIRS ${luaapipp_include_dirs})
