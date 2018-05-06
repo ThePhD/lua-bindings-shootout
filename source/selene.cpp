@@ -216,6 +216,20 @@ void selene_stateful_function_object_measure(benchmark::State& benchmark_state) 
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
+void selene_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	sel::State lua{ true };
+	lua.HandleExceptionsWith(lbs::selene_panic_throw);
+
+	lua["f"] = lbs::basic_multi_return;
+
+	lua(lbs::lua_multi_return_check.c_str());
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	for (auto _ : benchmark_state) {
+		lua(code.c_str());
+	}
+}
+
 void selene_multi_return_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
@@ -238,7 +252,47 @@ void selene_base_derived_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
-void selene_optional_measure(benchmark::State& benchmark_state) {
+void selene_optional_success_measure(benchmark::State& benchmark_state) {
+	sel::State lua;
+	lua.HandleExceptionsWith(lbs::selene_panic_throw);
+
+	lua(lbs::optional_success_precode.c_str());
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		auto cache = lua["warble"]["value"];
+		if (cache.exists()) {
+			double v = cache;
+			x += v;
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+}
+
+void selene_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	sel::State lua;
+	lua.HandleExceptionsWith(lbs::selene_panic_throw);
+
+	lua(lbs::optional_half_failure_precode.c_str());
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		auto cache = lua["warble"]["value"];
+		if (cache.exists()) {
+			double v = cache;
+			x += v;
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void selene_optional_failure_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
@@ -262,7 +316,7 @@ void selene_return_userdata_measure(benchmark::State& benchmark_state) {
 
 	lua["c"].SetClass<lbs::basic>();
 	lua["f"] = lbs::basic_return;
-	lua["h"] = lbs::basic_get;
+	lua["h"] = lbs::basic_get_var;
 
 	lua(lbs::return_userdata_check.c_str());
 
@@ -314,9 +368,12 @@ BENCHMARK(selene_member_function_call_measure);
 BENCHMARK(selene_userdata_variable_access_measure);
 BENCHMARK(selene_userdata_variable_access_large_measure);
 BENCHMARK(selene_userdata_variable_access_last_measure);
+BENCHMARK(selene_lua_multi_return_measure);
 BENCHMARK(selene_multi_return_measure);
 BENCHMARK(selene_stateful_function_object_measure);
 BENCHMARK(selene_base_derived_measure);
 BENCHMARK(selene_return_userdata_measure);
-BENCHMARK(selene_optional_measure);
+BENCHMARK(selene_optional_success_measure);
+BENCHMARK(selene_optional_half_failure_measure);
+BENCHMARK(selene_optional_failure_measure);
 BENCHMARK(selene_implicit_inheritance_measure);

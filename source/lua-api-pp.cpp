@@ -52,7 +52,7 @@ lua::Retval basic_return_setup(lua::Context& c) {
 }
 
 lua::Retval basic_get_setup(lua::Context& c) {
-	double r = lbs::basic_get(c.args[0].to<lbs::basic>());
+	double r = lbs::basic_get_var(c.args[0].to<lbs::basic>());
 	return c.ret(r);
 }
 
@@ -288,6 +288,23 @@ void lua_api_pp_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
+void lua_api_pp_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	lua::State l;
+	lua_atpanic(l.getRawState(), lbs::panic_throw);
+
+	lua::Context L(l.getRawState(), lua::Context::initializeExplicitly);
+	L.global.set("f", lua::mkcf<basic_multi_return_setup>);
+		
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void lua_api_pp_base_derived_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
@@ -312,7 +329,59 @@ void lua_api_pp_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void lua_api_pp_optional_measure(benchmark::State& benchmark_state) {
+void lua_api_pp_optional_success_measure(benchmark::State& benchmark_state) {
+	lua::State l;
+	lua_atpanic(l.getRawState(), lbs::panic_throw);
+
+	lua::Context L(l.getRawState(), lua::Context::initializeExplicitly);
+
+	l.runString(lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		if (L.global["warble"].type() == lua::ValueType::Table) {
+			if (L.global["warble"]["value"].is<double>()) {
+				double v = L.global["warble"]["value"];
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+}
+
+void lua_api_pp_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	lua::State l;
+	lua_atpanic(l.getRawState(), lbs::panic_throw);
+
+	lua::Context L(l.getRawState(), lua::Context::initializeExplicitly);
+
+	l.runString(lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		if (L.global["warble"].type() == lua::ValueType::Table) {
+			if (L.global["warble"]["value"].is<double>()) {
+				double v = L.global["warble"]["value"];
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void lua_api_pp_optional_failure_measure(benchmark::State& benchmark_state) {
 	lua::State l;
 	lua_atpanic(l.getRawState(), lbs::panic_throw);
 
@@ -356,9 +425,12 @@ BENCHMARK(lua_api_pp_member_function_call_measure);
 BENCHMARK(lua_api_pp_userdata_variable_access_measure);
 BENCHMARK(lua_api_pp_userdata_variable_access_large_measure);
 BENCHMARK(lua_api_pp_userdata_variable_access_last_measure);
+BENCHMARK(lua_api_pp_lua_multi_return_measure);
 BENCHMARK(lua_api_pp_multi_return_measure);
 BENCHMARK(lua_api_pp_stateful_function_object_measure);
 BENCHMARK(lua_api_pp_base_derived_measure);
 BENCHMARK(lua_api_pp_return_userdata_measure);
-BENCHMARK(lua_api_pp_optional_measure);
+BENCHMARK(lua_api_pp_optional_success_measure);
+BENCHMARK(lua_api_pp_optional_half_failure_measure);
+BENCHMARK(lua_api_pp_optional_failure_measure);
 BENCHMARK(lua_api_pp_implicit_inheritance_measure);

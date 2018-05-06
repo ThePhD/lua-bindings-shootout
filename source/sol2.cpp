@@ -334,6 +334,23 @@ void sol2_stateful_function_object_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
+void sol2_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	sol2::state lua(lbs::panic_throw);
+	lua.open_libraries();
+	lua_State* L = lua;
+
+	lua.set_function("f", sol2::c_call<decltype(&lbs::basic_multi_return), &lbs::basic_multi_return>);
+
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void sol2_multi_return_measure(benchmark::State& benchmark_state) {
 	sol2::state lua(lbs::panic_throw);
 	lua_State* L = lua;
@@ -377,7 +394,33 @@ void sol2_base_derived_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 2));
 }
 
-void sol2_optional_measure(benchmark::State& benchmark_state) {
+void sol2_optional_success_measure(benchmark::State& benchmark_state) {
+	sol2::state lua(lbs::panic_throw);
+
+	lua.script(lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		sol2::optional<double> v = lua["warble"]["value"];
+		x += v.value_or(1);
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+}
+
+void sol2_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	sol2::state lua(lbs::panic_throw);
+
+	lua.script(lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		sol2::optional<double> v = lua["warble"]["value"];
+		x += v.value_or(1);
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void sol2_optional_failure_measure(benchmark::State& benchmark_state) {
 	sol2::state lua(lbs::panic_throw);
 
 	double x = 0;
@@ -394,7 +437,7 @@ void sol2_return_userdata_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua;
 
 	lua.set_function("f", sol2::c_call<decltype(&lbs::basic_return), lbs::basic_return>);
-	lua.set_function("h", lbs::basic_get);
+	lua.set_function("h", lbs::basic_get_var);
 
 	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
 
@@ -451,9 +494,12 @@ BENCHMARK(sol2_member_function_call_measure);
 BENCHMARK(sol2_userdata_variable_access_measure);
 BENCHMARK(sol2_userdata_variable_access_large_measure);
 BENCHMARK(sol2_userdata_variable_access_last_measure);
+BENCHMARK(sol2_lua_multi_return_measure);
 BENCHMARK(sol2_multi_return_measure);
 BENCHMARK(sol2_stateful_function_object_measure);
 BENCHMARK(sol2_base_derived_measure);
 BENCHMARK(sol2_return_userdata_measure);
-BENCHMARK(sol2_optional_measure);
+BENCHMARK(sol2_optional_success_measure);
+BENCHMARK(sol2_optional_half_failure_measure);
+BENCHMARK(sol2_optional_failure_measure);
 BENCHMARK(sol2_implicit_inheritance_measure);

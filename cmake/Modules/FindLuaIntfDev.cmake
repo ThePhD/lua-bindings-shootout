@@ -60,6 +60,11 @@ add_library(${luaintf_lib} INTERFACE)
 add_dependencies(${luaintf_lib} LUAINTFDEV_SOURCE)
 target_include_directories(${luaintf_lib} INTERFACE ${luaintf_include_dirs})
 target_link_libraries(${luaintf_lib} INTERFACE ${LUA_LIBRARIES})
+target_compile_definitions(${luaintf_lib}
+	INTERFACE
+	"LUAINTF_HEADERS_ONLY=1"
+	"LUAINTF_LINK_LUA_COMPILED_IN_CXX=0"
+)
 if (NOT MSVC)
 	target_compile_options(${luaintf_lib} INTERFACE
 		-Wno-noexcept-type -Wno-ignored-qualifiers -Wno-unused-parameter)

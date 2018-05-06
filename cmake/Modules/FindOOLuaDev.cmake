@@ -44,7 +44,7 @@ list(APPEND oolua_sources "${oolua_dev_toplevel}/include/oolua.h")
 # # External project to get sources
 ExternalProject_Add(OOLUA_DEV_SOURCE
 	BUILD_IN_SOURCE TRUE
-	BUILD_ALWAYS FALSE
+	BUILD_ALWAYS TRUE
 	# # Use Git to get what we need
 	#GIT_SUBMODULES ""
 	GIT_SHALLOW TRUE
@@ -66,6 +66,7 @@ add_library(${oolua_lib} STATIC ${oolua_sources})
 add_dependencies(${oolua_lib} OOLUA_DEV_SOURCE)
 set_target_properties(${oolua_lib} PROPERTIES
 	OUTPUT_NAME oolua-${oolua_version}
+	LANGUAGE CXX
 	LINKER_LANGUAGE CXX
 	POSITION_INDEPENDENT_CODE TRUE)
 target_include_directories(${oolua_lib}
@@ -77,9 +78,7 @@ target_compile_definitions(${oolua_lib}
 	"OOLUA_RUNTIME_CHECKS_ENABLED=0"
 )
 if (MSVC)
-	target_compile_options(${oolua_lib}
-		PRIVATE /W1
-	)
+
 else()
 	target_compile_options(${oolua_lib}
 		PRIVATE -w

@@ -133,11 +133,12 @@ void lua_intf_c_function_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua;
 	lua_atpanic(L, lbs::panic_throw);
 
-	lua.doString("function f(i) return i end");
 	lua.setGlobal("f", lbs::basic_call);
 	LuaIntf::LuaRef f = lua.getGlobal("f");
-	std::string code = lbs::repeated_code("f(i)");
 
+	lbs::lua_bench_do_or_die(L, lbs::c_function_check);
+
+	std::string code = lbs::repeated_code(lbs::c_function_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -156,6 +157,7 @@ void lua_intf_lua_function_measure(benchmark::State& benchmark_state) {
 		double v = f.call<double>(lbs::magic_value());
 		x += v;
 	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_c_through_lua_function_measure(benchmark::State& benchmark_state) {
@@ -185,8 +187,10 @@ void lua_intf_member_function_call_measure(benchmark::State& benchmark_state) {
 		.endClass();
 
 	lua.doString("b = c()");
-	auto code = lbs::repeated_code(lbs::member_function_call_code);
 
+	lbs::lua_bench_do_or_die(L, lbs::member_function_call_check);
+
+	auto code = lbs::repeated_code(lbs::member_function_call_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -283,9 +287,10 @@ void lua_intf_userdata_variable_access_large_measure(benchmark::State& benchmark
 		.endClass();
 
 	lua.doString("b = cl()");
-	auto code = lbs::repeated_code(
-		lbs::userdata_variable_access_large_code);
 
+	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_check);
+
+	auto code = lbs::repeated_code(lbs::userdata_variable_access_large_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -355,9 +360,10 @@ void lua_intf_userdata_variable_access_last_measure(benchmark::State& benchmark_
 		.endClass();
 
 	lua.doString("b = cl()");
-	auto code = lbs::repeated_code(
-		lbs::userdata_variable_access_large_last_code);
 
+	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_last_check);
+
+	auto code = lbs::repeated_code(lbs::userdata_variable_access_large_last_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -395,6 +401,23 @@ void lua_intf_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
+void lua_intf_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	LuaIntf::LuaContext lua;
+	lua_State* L = lua;
+	lua_atpanic(lua, lbs::panic_throw);
+
+	lua.setGlobal("f", &lbs::basic_multi_return);
+
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	auto code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void lua_intf_base_derived_measure(benchmark::State& benchmark_state) {
 	// Unsupported?
 	// It seems like lua_intf has no facilities for base casting
@@ -413,8 +436,11 @@ void lua_intf_return_userdata_measure(benchmark::State& benchmark_state) {
 		.endClass();
 
 	lua.setGlobal("f", &lbs::basic_return);
-	auto code = lbs::repeated_code("b = f(i)");
+	lua.setGlobal("h", &lbs::basic_get_var);
 
+	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
+
+	auto code = lbs::repeated_code(lbs::return_userdata_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -422,7 +448,7 @@ void lua_intf_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void lua_intf_optional_measure(benchmark::State& benchmark_state) {
+void lua_intf_optional_failure_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
@@ -438,6 +464,46 @@ void lua_intf_optional_measure(benchmark::State& benchmark_state) {
 		}
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void lua_intf_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	LuaIntf::LuaContext lua;
+	lua_atpanic(lua, lbs::panic_throw);
+
+	lbs::lua_bench_do_or_die(lua, lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		LuaIntf::LuaRef tu = lua.getGlobal("warble.value");
+		if (tu.type() == LuaIntf::LuaTypeID::NUMBER) {
+			double v = tu.toValue<double>();
+			x += v;
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void lua_intf_optional_success_measure(benchmark::State& benchmark_state) {
+	LuaIntf::LuaContext lua;
+	lua_atpanic(lua, lbs::panic_throw);
+
+	lbs::lua_bench_do_or_die(lua, lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		LuaIntf::LuaRef tu = lua.getGlobal("warble.value");
+		if (tu.type() == LuaIntf::LuaTypeID::NUMBER) {
+			double v = tu.toValue<double>();
+			x += v;
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void lua_intf_implicit_inheritance_measure(benchmark::State& benchmark_state) {
@@ -470,18 +536,9 @@ void lua_intf_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 
 	lua.doString("b = cab()");
 
-	{
-		lua.doString("a = b:b_func()");
-		double value = lua.getGlobal<double>("a");
-		if (value != lbs::magic_value()) {
-			lbs::unsupported(benchmark_state);
-			return;
-		}
-		lua.doString("a = nil");
-	}
+	lbs::lua_bench_do_or_die(L, lbs::implicit_inheritance_check);
 
 	std::string code = lbs::repeated_code(lbs::implicit_inheritance_code);
-
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -506,5 +563,7 @@ BENCHMARK(lua_intf_multi_return_measure);
 BENCHMARK(lua_intf_stateful_function_object_measure);
 BENCHMARK(lua_intf_base_derived_measure);
 BENCHMARK(lua_intf_return_userdata_measure);
-BENCHMARK(lua_intf_optional_measure);
+BENCHMARK(lua_intf_optional_success_measure);
+BENCHMARK(lua_intf_optional_half_failure_measure);
+BENCHMARK(lua_intf_optional_failure_measure);
 BENCHMARK(lua_intf_implicit_inheritance_measure);

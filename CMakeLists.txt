@@ -35,15 +35,15 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 # whether or not we should build as 32-bit
 if (CMAKE_SIZEOF_VOID_P EQUAL 4 OR LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS)
 	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS ON CACHE BOOL "Enable a 32-bit build.")
-	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
-	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
+	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
+	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 else()
 	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS OFF CACHE BOOL "Enable a 32-bit build.")
-	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
-	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
+	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
+	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
@@ -67,7 +67,10 @@ find_package(LuaIntfDev REQUIRED)
 find_package(ToLuappDev REQUIRED)
 find_package(LuaApippDev REQUIRED)
 find_package(LuaBridgeDev REQUIRED)
+find_package(LuabindDev REQUIRED)
 find_package(OOLuaDev REQUIRED)
+find_package(LuaCppInterface REQUIRED)
+find_package(Luawrapper REQUIRED)
 
 # Subdirectory Google Benchmark, after setting all cache variables
 set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE INTERNAL "Enable the use of exceptions in the benchmark library." FORCE)
@@ -93,8 +96,13 @@ set(lua_bindings_shootout_sources
 	"source/lbs_lib.hpp"
 	"source/lbs_lua.hpp"
 
+	"source/luawrapper.cpp"
+	"source/luacppinterface.cpp"
+
+	"source/swig.cpp"
+	"source/toluapp.cpp"
+	"source/luabind.cpp"
 	"source/lua-api-pp.cpp"
-	
 	"source/oolua.cpp"
 	"source/luabridge.cpp"
 	"source/lua-intf.cpp"
@@ -115,13 +123,16 @@ target_link_libraries(lua_bindings_shootout
 	# lua library
 	${LUA_LIBRARIES}
 	# binding libraries
+	${LUACPPINTERFACE_LIBRARIES}
+	${LUAWRAPPER_LIBRARIES}
+	${TOLUAPP_LIBRARIES}
+	${LUABIND_LIBRARIES}
 	${LUAAPIPP_LIBRARIES}
 	${LUABRIDGE_LIBRARIES}
 	${KAGUYA_LIBRARIES}
 	${SELENE_LIBRARIES}
 	${LUWRA_LIBRARIES}
 	${LUAINTF_LIBRARIES}
-	${TOLUAPP_LIBRARIES}
 	${OOLUA_LIBRARIES}
 	sol2
 	# benchmarking library and utilities
@@ -132,13 +143,8 @@ target_compile_definitions(lua_bindings_shootout
 	PRIVATE
 	_CRT_SECURE_NO_WARNINGS
 	_SCL_SECURE_NO_WARNINGS
-	OOLUA_RUNTIME_CHECKS_ENABLED=0
-	LUAINTF_HEADERS_ONLY
-	LUAINTF_LINK_LUA_COMPILED_IN_CXX=0
 	SLB_EXTERNAL_LUA
 	SLB_DYNAMIC_LIBRARY
-	LUABIND_DYNAMIC_LINK
-	BOOST_WINDOWS
 	LUA_COMPAT_ALL
 	LUA_COMPAT_52
 	LUA_COMPAT_51

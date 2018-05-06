@@ -365,6 +365,23 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
+void plain_c_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(true);
+	lua_State* L = lua.get();
+
+	lua_pushcclosure(L, &lbs::basic_multi_return_wrap, 0);
+	lua_setglobal(L, "f");
+
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void plain_c_base_derived_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
@@ -431,7 +448,7 @@ void plain_c_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void plain_c_optional_measure(benchmark::State& benchmark_state) {
+void plain_c_optional_failure_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
 
@@ -444,13 +461,73 @@ void plain_c_optional_measure(benchmark::State& benchmark_state) {
 				double v = static_cast<double>(lua_tonumber(L, -1));
 				x += v;
 			}
+			else {
+				x += 1;
+			}
 			lua_pop(L, 2);
-			continue;
 		}
-		lua_pop(L, 1);
-		x += 1;
+		else {
+			lua_pop(L, 1);
+			x += 1;
+		}
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void plain_c_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(false);
+	lua_State* L = lua.get();
+
+	lbs::lua_bench_do_or_die(L, lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		lua_getglobal(L, "warble");
+		if (lua_type(L, -1) != LUA_TNIL) {
+			lua_getfield(L, -1, "value");
+			if (lua_type(L, -1) != LUA_TNIL) {
+				double v = static_cast<double>(lua_tonumber(L, -1));
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+			lua_pop(L, 2);
+		}
+		else {
+			lua_pop(L, 1);
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void plain_c_optional_success_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(false);
+	lua_State* L = lua.get();
+
+	lbs::lua_bench_do_or_die(L, lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		lua_getglobal(L, "warble");
+		if (lua_type(L, -1) != LUA_TNIL) {
+			lua_getfield(L, -1, "value");
+			if (lua_type(L, -1) != LUA_TNIL) {
+				double v = static_cast<double>(lua_tonumber(L, -1));
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+			lua_pop(L, 2);
+		}
+		else {
+			lua_pop(L, 1);
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_implicit_inheritance_measure(benchmark::State& benchmark_state) {
@@ -492,9 +569,12 @@ BENCHMARK(plain_c_member_function_call_measure);
 BENCHMARK(plain_c_userdata_variable_access_measure);
 BENCHMARK(plain_c_userdata_variable_access_large_measure);
 BENCHMARK(plain_c_userdata_variable_access_last_measure);
+BENCHMARK(plain_c_lua_multi_return_measure);
 BENCHMARK(plain_c_multi_return_measure);
 BENCHMARK(plain_c_stateful_function_object_measure);
 BENCHMARK(plain_c_base_derived_measure);
 BENCHMARK(plain_c_return_userdata_measure);
-BENCHMARK(plain_c_optional_measure);
+BENCHMARK(plain_c_optional_failure_measure);
+BENCHMARK(plain_c_optional_half_failure_measure);
+BENCHMARK(plain_c_optional_success_measure);
 BENCHMARK(plain_c_implicit_inheritance_measure);

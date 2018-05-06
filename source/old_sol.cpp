@@ -383,13 +383,31 @@ void old_sol_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
+void old_sol_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	old_sol::state lua;
+	lua.open_libraries();
+	lua_atpanic(lua.lua_state(), lbs::panic_throw);
+	lua_State* L = lua.lua_state();
+
+	lua.set_function("f", &lbs::basic_multi_return);
+
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void old_sol_base_derived_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
 }
 
-void old_sol_optional_measure(benchmark::State& benchmark_state) {
+void old_sol_optional_failure_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
@@ -409,6 +427,50 @@ void old_sol_optional_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
 }
 
+void old_sol_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	old_sol::state lua;
+	lua_atpanic(lua.lua_state(), lbs::panic_throw);
+
+	lua.script(lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		old_sol::object o1 = lua["warble"];
+		if (o1.get_type() == old_sol::type::table) {
+			old_sol::table t1 = o1.as<old_sol::table>();
+			old_sol::object o2 = t1["value"];
+			if (o2.get_type() == old_sol::type::number) {
+				x += o2.as<double>();
+				continue;
+			}
+		}
+		x += 1;
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void old_sol_optional_success_measure(benchmark::State& benchmark_state) {
+	old_sol::state lua;
+	lua_atpanic(lua.lua_state(), lbs::panic_throw);
+
+	lua.script(lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		old_sol::object o1 = lua["warble"];
+		if (o1.get_type() == old_sol::type::table) {
+			old_sol::table t1 = o1.as<old_sol::table>();
+			old_sol::object o2 = t1["value"];
+			if (o2.get_type() == old_sol::type::number) {
+				x += o2.as<double>();
+				continue;
+			}
+		}
+		x += 1;
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+}
+
 void old_sol_return_userdata_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua.open_libraries();
@@ -416,7 +478,7 @@ void old_sol_return_userdata_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua.lua_state();
 
 	lua.set_function("f", lbs::basic_return);
-	lua.set_function("h", lbs::basic_get);
+	lua.set_function("h", lbs::basic_get_var);
 
 	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
 
@@ -446,8 +508,11 @@ BENCHMARK(old_sol_userdata_variable_access_measure);
 BENCHMARK(old_sol_userdata_variable_access_large_measure);
 BENCHMARK(old_sol_userdata_variable_access_last_measure);
 BENCHMARK(old_sol_multi_return_measure);
+BENCHMARK(old_sol_lua_multi_return_measure);
 BENCHMARK(old_sol_stateful_function_object_measure);
 BENCHMARK(old_sol_base_derived_measure);
 BENCHMARK(old_sol_return_userdata_measure);
-BENCHMARK(old_sol_optional_measure);
+BENCHMARK(old_sol_optional_success_measure);
+BENCHMARK(old_sol_optional_half_failure_measure);
+BENCHMARK(old_sol_optional_failure_measure);
 BENCHMARK(old_sol_implicit_inheritance_measure);

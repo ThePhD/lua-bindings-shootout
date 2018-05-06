@@ -481,6 +481,12 @@ namespace lbs {
 	const std::string member_function_call_check = "b:set(56921) x = b:get() assert(x == 56921)";
 	const std::string member_function_call_code = "b:set(i) x = b:get()";
 
+	const std::string lua_multi_return_check = "x, y = f(98231) assert(x == 98231) assert(y == (98231 * 2))";
+	const std::string lua_multi_return_code = "x, y = f(i)";
+
+	const std::string optional_success_precode = "warble = { value = " + magic_value_string() + "}";
+	const std::string optional_half_failure_precode = "warble = {}";
+
 	inline bool verify_base_correctness(complex_base_a& va, complex_base_b& vb, complex_ab& ab) {
 		if (va.a_func() != ab.a_func() || va.a != ab.a) {
 			return false;

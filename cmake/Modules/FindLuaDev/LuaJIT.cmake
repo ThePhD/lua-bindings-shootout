@@ -117,9 +117,9 @@ else()
 	MESSAGE(FATAL "Cannot deduce LuaJIT version from ${LUA_VERSION}")
 endif()
 
-FIND_PACKAGE_MESSAGE(LuaDev
-	"Selecting LuaJIT ${LUA_JIT_VERSION} from '${LUA_VERSION}' and building a ${LUA_DEV_LIBRARY_TYPE} library..."
-	"[${LUA_JIT_VERSION}][${LUA_VERSION}][${LUA_DEV_LIBRARY_TYPE}]")
+#FIND_PACKAGE_MESSAGE(LuaDev
+#	"Selecting LuaJIT ${LUA_JIT_VERSION} from '${LUA_VERSION}' and building a ${LUA_DEV_LIBRARY_TYPE} library..."
+#	"[${LUA_JIT_VERSION}][${LUA_VERSION}][${LUA_DEV_LIBRARY_TYPE}]")
 
 # Get hashes for the build
 # LuaJIT unfortunately does not give us SHA1 hashes as well

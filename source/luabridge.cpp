@@ -31,6 +31,13 @@
 
 #include <memory>
 
+int luabridge_multi_return(lua_State* L) {
+	double i = luabridge::LuaRef::fromStack(L, -1);
+	luabridge::push(L, i);
+	luabridge::push(L, i * 2);
+	return 2;
+}
+
 void luabridge_global_string_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state();
 	lua_State* L = lua.get();
@@ -398,24 +405,44 @@ void luabridge_stateful_function_object_measure(benchmark::State& benchmark_stat
 }
 
 void luabridge_multi_return_measure(benchmark::State& benchmark_state) {
-	// doesn't understand tuples or out-parameters
+	// LuaBridge forces only 1 conceptual return to C++
+	// RIP.
 	lbs::unsupported(benchmark_state);
 	return;
 
-	/*
-	auto lua = lbs::create_state();
+	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
-	luabridge::setGlobal(L, &lbs::basic_multi_return, "f");
+	luabridge::getGlobalNamespace(L).addCFunction("f", luabridge_multi_return);
+
 	luabridge::LuaRef f = luabridge::getGlobal(L, "f");
+
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		std::tuple<double, double> v = f(lbs::magic_value());
-		x += std::get<0>(v);
-		x += std::get<1>(v);
+		// does not work
+		auto r = f(lbs::magic_value());
+		double v = r;
+		double w = luabridge::LuaRef::fromStack(L, -2);
+		x += v;
+		x += w;
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
-	*/
+}
+
+void luabridge_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(true);
+	lua_State* L = lua.get();
+
+	luabridge::getGlobalNamespace(L).addCFunction("f", luabridge_multi_return);
+
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	auto code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
 }
 
 void luabridge_base_derived_measure(benchmark::State& benchmark_state) {
@@ -437,7 +464,7 @@ void luabridge_return_userdata_measure(benchmark::State& benchmark_state) {
 		.beginClass<lbs::basic>("c")
 		.endClass()
 		.addFunction("f", &lbs::basic_return)
-		.addFunction("h", &lbs::basic_get);
+		.addFunction("h", &lbs::basic_get_var);
 
 	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
 
@@ -449,16 +476,84 @@ void luabridge_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void luabridge_optional_measure(benchmark::State& benchmark_state) {
-	// no way to ensure optional table digging without
-	// the C API
-	lbs::unsupported(benchmark_state);
-	return;
+void luabridge_optional_success_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(true);
+	lua_State* L = lua.get();
+
+	lbs::lua_bench_do_or_die(L, lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		luabridge::LuaRef tt = luabridge::getGlobal(L, "warble");
+		if (tt.isTable()) {
+			luabridge::LuaRef tu = tt["value"];
+			if (tu.isNumber()) {
+				double v = tu;
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+}
+
+void luabridge_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(true);
+	lua_State* L = lua.get();
+
+	lbs::lua_bench_do_or_die(L, lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		luabridge::LuaRef tt = luabridge::getGlobal(L, "warble");
+		if (tt.isTable()) {
+			luabridge::LuaRef tu = tt["value"];
+			if (tu.isNumber()) {
+				double v = tu;
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void luabridge_optional_failure_measure(benchmark::State& benchmark_state) {
+	auto lua = lbs::create_state(true);
+	lua_State* L = lua.get();
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		luabridge::LuaRef tt = luabridge::getGlobal(L, "warble");
+		if (tt.isTable()) {
+			luabridge::LuaRef tu = tt["value"];
+			if (tu.isNumber()) {
+				double v = tu;
+				x += v;
+			}
+			else {
+				x += 1;
+			}
+		}
+		else {
+			x += 1;
+		}
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
 }
 
 void luabridge_implicit_inheritance_measure(benchmark::State& benchmark_state) {
-	// Unsupported?
-	// Ask author
+	// Only single inheritance
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
@@ -485,15 +580,6 @@ void luabridge_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 
 	lbs::lua_bench_do_or_die(L, "b = cab()");
 
-	{
-		lbs::lua_bench_do_or_die(L, "a = b:b_func()");
-		double value = luabridge::getGlobal(L, "a");
-		if (value != lbs::magic_value()) {
-			lbs::unsupported(benchmark_state);
-			return;
-		}
-	}
-
 	lbs::lua_bench_do_or_die(L, lbs::implicit_inheritance_check);
 
 	std::string code = lbs::repeated_code(lbs::implicit_inheritance_code);
@@ -518,8 +604,11 @@ BENCHMARK(luabridge_userdata_variable_access_measure);
 BENCHMARK(luabridge_userdata_variable_access_large_measure);
 BENCHMARK(luabridge_userdata_variable_access_last_measure);
 BENCHMARK(luabridge_multi_return_measure);
+BENCHMARK(luabridge_lua_multi_return_measure);
 BENCHMARK(luabridge_stateful_function_object_measure);
 BENCHMARK(luabridge_base_derived_measure);
 BENCHMARK(luabridge_return_userdata_measure);
-BENCHMARK(luabridge_optional_measure);
+BENCHMARK(luabridge_optional_success_measure);
+BENCHMARK(luabridge_optional_half_failure_measure);
+BENCHMARK(luabridge_optional_failure_measure);
 BENCHMARK(luabridge_implicit_inheritance_measure);

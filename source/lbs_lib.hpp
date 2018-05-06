@@ -89,10 +89,14 @@ namespace lbs {
 		int var47 = 547;
 		int var48 = 548;
 		int64_t var49 = 549;
+
+		basic_large() = default;
 	};
 
 	struct basic_stateful {
 		double storage;
+
+		basic_stateful() = default;
 
 		double operator()(double i) {
 			storage = i;
@@ -103,6 +107,8 @@ namespace lbs {
 	struct complex_base_a {
 		double a = lbs::magic_value() - 2;
 
+		complex_base_a() = default;
+
 		virtual double a_func() const {
 			return a;
 		}
@@ -111,6 +117,8 @@ namespace lbs {
 	struct complex_base_b {
 		double b = lbs::magic_value() - 1;
 
+		complex_base_b() = default;
+
 		virtual double b_func() const {
 			return b;
 		}
@@ -118,6 +126,8 @@ namespace lbs {
 
 	struct complex_ab : complex_base_a, complex_base_b {
 		double ab = lbs::magic_value();
+
+		complex_ab() = default;
 
 		virtual double a_func() const override {
 			return ab;
@@ -140,7 +150,7 @@ namespace lbs {
 		return basic(x);
 	}
 
-	inline double basic_get(const basic& b) {
+	inline double basic_get_var(const basic& b) {
 		return b.var;
 	}
 

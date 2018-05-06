@@ -133,9 +133,9 @@ else()
 	message(FATAL_ERROR "Cannot deduce the proper Lua version from ${LUA_VERSION}")
 endif()
 
-FIND_PACKAGE_MESSAGE(LuaDev
-	"Selecting PUC-RIO Lua ${LUA_VANILLA_VERSION} from '${LUA_VERSION}' and building a ${LUA_DEV_LIBRARY_TYPE} library..."
-	"[${LUA_VANILLA_VERSION}][${LUA_VERSION}][${LUA_DEV_LIBRARY_TYPE}]")
+#FIND_PACKAGE_MESSAGE(LuaDev
+#	"Selecting PUC-RIO Lua ${LUA_VANILLA_VERSION} from '${LUA_VERSION}' and building a ${LUA_DEV_LIBRARY_TYPE} library..."
+#	"[${LUA_VANILLA_VERSION}][${LUA_VERSION}][${LUA_DEV_LIBRARY_TYPE}]")
 
 # Get Hashes to use for download
 set(LUA_VANILLA_SHA1 ${LUA_VANILLA_SHA1_${LUA_VANILLA_VERSION}})
@@ -280,13 +280,6 @@ if (lualib_target_type STREQUAL "SHARED_LIBRARY")
 	target_compile_definitions(${liblua}
 		PUBLIC LUA_BUILD_AS_DLL)
 endif ()
-if (MSVC)
-	target_compile_options(${liblua}
-		PRIVATE /W1)
-else()
-	target_compile_options(${liblua}
-		PRIVATE -w)
-endif()
 if (WIN32)
 	#target_compile_definitions(${liblua}
 	#	PRIVATE LUA_USE_WINDOWS)
@@ -319,13 +312,6 @@ target_include_directories(${luainterpreter}
 target_compile_definitions(${luainterpreter}
 	PUBLIC LUA_COMPAT_ALL ${LUA_VANILLA_DLL_DEFINE}
 	PRIVATE LUA_COMPAT_ALL ${LUA_VANILLA_DLL_DEFINE})
-if (MSVC)
-	target_compile_options(${luainterpreter}
-		PRIVATE /W1)
-else()
-	target_compile_options(${luainterpreter}
-		PRIVATE -w)
-endif()
 if (WIN32)
 	#target_compile_definitions(${luainterpreter} 
 	#	PRIVATE LUA_USE_WINDOWS)
@@ -359,13 +345,6 @@ target_include_directories(${luacompiler}
 target_compile_definitions(${luacompiler}
 	PUBLIC LUA_COMPAT_ALL ${LUA_VANILLA_DLL_DEFINE}
 	PRIVATE LUA_COMPAT_ALL ${LUA_VANILLA_DLL_DEFINE})
-if (MSVC)
-	target_compile_options(${luacompiler}
-		PRIVATE /W1)
-else()
-	target_compile_options(${luacompiler}
-		PRIVATE -w)
-endif()
 if (WIN32)
 	#target_compile_definitions(${luacompiler} 
 	#	PRIVATE LUA_USE_WINDOWS)

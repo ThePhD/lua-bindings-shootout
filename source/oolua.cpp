@@ -77,7 +77,7 @@ OOLUA_EXPORT_FUNCTIONS_CONST(complex_base_b, b_func)
 OOLUA_EXPORT_FUNCTIONS_CONST(complex_ab, ab_func)
 
 OOLUA_CFUNC(lbs::basic_call, oo_basic_call)
-OOLUA_CFUNC(lbs::basic_get, oo_basic_get)
+OOLUA_CFUNC(lbs::basic_get_var, oo_basic_get)
 int oo_basic_multi_return(lua_State* vm) {
 	using namespace OOLUA;
 	OOLUA_C_FUNCTION(void, lbs::basic_multi_return_out, double, in_out_p<double&>, in_out_p<double&>)
@@ -403,6 +403,25 @@ void oolua_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * lbs::magic_value()));
 }
 
+void oolua_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	using namespace OOLUA;
+	Script vm;
+	lua_State* L = vm;
+	lua_atpanic(L, lbs::panic_throw);
+
+	set_global(vm, oolua_f.c_str(), oo_basic_multi_return);
+	Lua_function f(vm);
+
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void oolua_base_derived_measure(benchmark::State& benchmark_state) {
 	lbs::unsupported(benchmark_state);
 	return;
@@ -437,7 +456,19 @@ void oolua_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void oolua_optional_measure(benchmark::State& benchmark_state) {
+void oolua_optional_failure_measure(benchmark::State& benchmark_state) {
+	// Unsupported?
+	lbs::unsupported(benchmark_state);
+	return;
+}
+
+void oolua_optional_success_measure(benchmark::State& benchmark_state) {
+	// Unsupported?
+	lbs::unsupported(benchmark_state);
+	return;
+}
+
+void oolua_optional_half_failure_measure(benchmark::State& benchmark_state) {
 	// Unsupported?
 	lbs::unsupported(benchmark_state);
 	return;
@@ -484,8 +515,11 @@ BENCHMARK(oolua_userdata_variable_access_measure);
 BENCHMARK(oolua_userdata_variable_access_large_measure);
 BENCHMARK(oolua_userdata_variable_access_last_measure);
 BENCHMARK(oolua_multi_return_measure);
+BENCHMARK(oolua_lua_multi_return_measure);
 BENCHMARK(oolua_stateful_function_object_measure);
 BENCHMARK(oolua_base_derived_measure);
 BENCHMARK(oolua_return_userdata_measure);
-BENCHMARK(oolua_optional_measure);
+BENCHMARK(oolua_optional_success_measure);
+BENCHMARK(oolua_optional_half_failure_measure);
+BENCHMARK(oolua_optional_failure_measure);
 BENCHMARK(oolua_implicit_inheritance_measure);

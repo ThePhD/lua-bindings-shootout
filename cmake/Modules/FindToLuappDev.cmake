@@ -40,7 +40,7 @@ list(APPEND toluapp_sources "${toluapp_dev_toplevel}/include/tolua++.h")
 # # External project to get sources
 ExternalProject_Add(TOLUAPP_DEV_SOURCE
 	BUILD_IN_SOURCE TRUE
-	BUILD_ALWAYS FALSE
+	BUILD_ALWAYS TRUE
 	# # Use Git to get what we need
 	#GIT_SUBMODULES ""
 	GIT_SHALLOW TRUE
@@ -67,21 +67,17 @@ target_include_directories(${toluapp_lib}
 	PUBLIC ${toluapp_include_dirs})
 target_link_libraries(${toluapp_lib} PRIVATE ${LUA_LIBRARIES})
 if (MSVC)
-	target_compile_options(${toluapp_lib}
-		PRIVATE /W1
-	)
 	target_compile_definitions(${toluapp_lib}
-		PRIVATE "TOLUA_API=__declspec(dllexport)"
-		INTERFACE "TOLUA_API=__declspec(dllimport)"
+		PRIVATE 
+		"TOLUA_API=__declspec(dllexport)"
+		"_CRT_SECURE_NO_WARNINGS=1"
+		INTERFACE 
+		"TOLUA_API=__declspec(dllimport)"
 	)
 else()
-	target_compile_options(${toluapp_lib}
-		PRIVATE -w
-		INTERFACE -Wno-noexcept-type
-		PUBLIC -Wno-ignored-qualifiers -Wno-unused-parameter)
 	target_compile_definitions(${toluapp_lib}
-		PRIVATE TOLUA_API=
-		INTERFACE TOLUA_API=extern
+		PRIVATE "TOLUA_API="
+		INTERFACE "TOLUA_API="
 	)
 endif()
 if (CMAKE_DL_LIBS)

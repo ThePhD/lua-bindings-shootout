@@ -227,6 +227,23 @@ void kaguya_stateful_function_object_measure(benchmark::State& benchmark_state) 
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
+void kaguya_lua_multi_return_measure(benchmark::State& benchmark_state) {
+	kaguya::State lua;
+	lua_State* L = lua.state();
+	lua.setErrorHandler(lbs::kaguya_panic_throw);
+
+	lua["f"].setFunction(lbs::basic_multi_return);
+	
+	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
+
+	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
+	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
+	for (auto _ : benchmark_state) {
+		lbs::lua_bench_preload_do_or_die(L, code_index);
+	}
+	lbs::lua_bench_unload(L, code_index);
+}
+
 void kaguya_multi_return_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
@@ -280,7 +297,7 @@ void kaguya_return_userdata_measure(benchmark::State& benchmark_state) {
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
 	lua["f"].setFunction(lbs::basic_return);
-	lua["h"].setFunction(lbs::basic_get);
+	lua["h"].setFunction(lbs::basic_get_var);
 
 	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
 
@@ -292,7 +309,42 @@ void kaguya_return_userdata_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void kaguya_optional_measure(benchmark::State& benchmark_state) {
+void kaguya_optional_success_measure(benchmark::State& benchmark_state) {
+	// Almost unsupported
+	// Converting directly to `optional<T>` fails,
+	// have to use value_or on the proxy
+	kaguya::State lua;
+	lua_State* L = lua.state();
+	lua.setErrorHandler(lbs::kaguya_panic_throw);
+
+	lua(lbs::optional_success_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		double v = lua["warble"]["value"].value_or<double>(1);
+		x += v;
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
+}
+
+void kaguya_optional_half_failure_measure(benchmark::State& benchmark_state) {
+	// Almost unsupported
+	// Converting directly to `optional<T>` fails,
+	// have to use value_or on the proxy
+	kaguya::State lua;
+	lua.setErrorHandler(lbs::kaguya_panic_throw);
+
+	lua(lbs::optional_half_failure_precode);
+
+	double x = 0;
+	for (auto _ : benchmark_state) {
+		double v = lua["warble"]["value"].value_or<double>(1);
+		x += v;
+	}
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * 1);
+}
+
+void kaguya_optional_failure_measure(benchmark::State& benchmark_state) {
 	// Almost unsupported
 	// Converting directly to `optional<T>` fails,
 	// have to use value_or on the proxy
@@ -359,5 +411,7 @@ BENCHMARK(kaguya_stateful_function_object_measure);
 BENCHMARK(kaguya_base_derived_measure);
 BENCHMARK(kaguya_base_derived_measure);
 BENCHMARK(kaguya_return_userdata_measure);
-BENCHMARK(kaguya_optional_measure);
+BENCHMARK(kaguya_optional_success_measure);
+BENCHMARK(kaguya_optional_half_failure_measure);
+BENCHMARK(kaguya_optional_failure_measure);
 BENCHMARK(kaguya_implicit_inheritance_measure);
