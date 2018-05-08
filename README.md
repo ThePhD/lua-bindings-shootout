@@ -6,22 +6,22 @@ A benchmarking many of the canonical/best/popular lua bindings for their perform
 
 The following bindings are benchmarked or are being aimed to be benchmarked. All are built on top of plain C:
 
-[x] - Plain C (PUC-RIO Lua, 5.3.4)
-[x] - sol1 (Rapptz, v1.1.0)
-[x] - sol2 (ThePhD, v2.20.0)
-[x] - sol3 (ThePhD, latest)
-[x] - luabridge (Vinnie Falco, latest)
-[x] - OOLua (LiamDevine, forked at v2.0.1 (latest) from elite-lang since website is down (May 1st, 2018))
-[x] - Lua-Intf (Steve K. Chiu, latest)
-[x] - Selene (Jeremy Ong, forked at latest + patches)
-[x] - Kaguya (satoren, latest)
-[x] - Luwra (Ole Krüger, latest)
-[x] - lua-api-pp (OldFisher, latest + patches)
-[x] - tolua++ (Ariel Manzur, Waldemar Celes, latest)
-[x] - SWIG (Maintained by various, latest as of May 4th, 2018)
-[x] - luawrapper (Tomaka, maintained by Bert Hubert, latest)
-[x] - luacppinterface (David Siaw, latest)
-[x] - luabind (Rasterbar, latest + patches)
+* [x] Plain C (PUC-RIO Lua, 5.3.4)
+* [x] sol1 (Rapptz, v1.1.0)
+* [x] sol2 (ThePhD, v2.20.0)
+* [x] sol3 (ThePhD, latest)
+* [x] luabridge (Vinnie Falco, latest)
+* [x] OOLua (LiamDevine, forked at v2.0.1 (latest) from elite-lang since website is down (May 1st, 2018))
+* [x] Lua-Intf (Steve K. Chiu, latest)
+* [x] Selene (Jeremy Ong, forked at latest + patches)
+* [x] Kaguya (satoren, latest)
+* [x] Luwra (Ole Krüger, latest)
+* [x] lua-api-pp (OldFisher, latest + patches)
+* [x] tolua++ (Ariel Manzur, Waldemar Celes, latest)
+* [x] SWIG (Maintained by various, latest as of May 4th, 2018)
+* [x] luawrapper (Tomaka, maintained by Bert Hubert, latest)
+* [x] luacppinterface (David Siaw, latest)
+* [x] luabind (Rasterbar, latest + patches)
 
 ## "Can you Benchmark X?"
 
