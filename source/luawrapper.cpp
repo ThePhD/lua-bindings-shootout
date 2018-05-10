@@ -1,7 +1,7 @@
 // lua bindings shootout
 // The MIT License (MIT)
 
-// Copyright © 2018 ThePhD
+// Copyright ï¿½ 2018 ThePhD
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -183,7 +183,7 @@ void luawrapper_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luawrapper_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void luawrapper_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
 
@@ -403,7 +403,7 @@ void luawrapper_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
-void luawrapper_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void luawrapper_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua, true);
 
@@ -433,19 +433,20 @@ void luawrapper_base_derived_measure(benchmark::State& benchmark_state) {
 	lbs::complex_ab ab;
 	lua.writeVariable("b", &ab);
 	{
-		lbs::complex_base_a& va = lua.readVariable<lbs::complex_base_a>("b");
-		lbs::complex_base_b& vb = lua.readVariable<lbs::complex_base_b>("b");
-		if (!lbs::verify_base_correctness(va, vb, ab)) {
+		// cannot quite do this
+		lbs::complex_base_a* va = lua.readVariable<lbs::complex_base_a*>("b");
+		lbs::complex_base_b* vb = lua.readVariable<lbs::complex_base_b*>("b");
+		if (!lbs::verify_base_correctness(*va, *vb, ab)) {
 			lbs::unsupported(benchmark_state);
 			return;
 		}
 	}
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		lbs::complex_base_a& va = lua.readVariable<lbs::complex_base_a>("b");
-		lbs::complex_base_b& vb = lua.readVariable<lbs::complex_base_b>("b");
-		x += va.a_func();
-		x += vb.b_func();
+		lbs::complex_base_a* va = lua.readVariable<lbs::complex_base_a*>("b");
+		lbs::complex_base_b* vb = lua.readVariable<lbs::complex_base_b*>("b");
+		x += va->a_func();
+		x += vb->b_func();
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 2));
 }
@@ -500,13 +501,13 @@ BENCHMARK(luawrapper_table_set_measure);
 BENCHMARK(luawrapper_table_chained_get_measure);
 BENCHMARK(luawrapper_table_chained_set_measure);
 BENCHMARK(luawrapper_c_function_measure);
-BENCHMARK(luawrapper_c_through_lua_function_measure);
+BENCHMARK(luawrapper_lua_function_through_c_measure);
 BENCHMARK(luawrapper_lua_function_measure);
 BENCHMARK(luawrapper_member_function_call_measure);
 BENCHMARK(luawrapper_userdata_variable_access_measure);
 BENCHMARK(luawrapper_userdata_variable_access_large_measure);
 BENCHMARK(luawrapper_userdata_variable_access_last_measure);
-BENCHMARK(luawrapper_lua_multi_return_measure);
+BENCHMARK(luawrapper_multi_return_lua_measure);
 BENCHMARK(luawrapper_multi_return_measure);
 BENCHMARK(luawrapper_stateful_function_object_measure);
 BENCHMARK(luawrapper_base_derived_measure);

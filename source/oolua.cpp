@@ -251,7 +251,7 @@ void oolua_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void oolua_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void oolua_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
@@ -403,7 +403,7 @@ void oolua_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * lbs::magic_value()));
 }
 
-void oolua_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void oolua_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_State* L = vm;
@@ -508,14 +508,14 @@ BENCHMARK(oolua_table_set_measure);
 BENCHMARK(oolua_table_chained_get_measure);
 BENCHMARK(oolua_table_chained_set_measure);
 BENCHMARK(oolua_c_function_measure);
-BENCHMARK(oolua_c_through_lua_function_measure);
+BENCHMARK(oolua_lua_function_through_c_measure);
 BENCHMARK(oolua_lua_function_measure);
 BENCHMARK(oolua_member_function_call_measure);
 BENCHMARK(oolua_userdata_variable_access_measure);
 BENCHMARK(oolua_userdata_variable_access_large_measure);
 BENCHMARK(oolua_userdata_variable_access_last_measure);
 BENCHMARK(oolua_multi_return_measure);
-BENCHMARK(oolua_lua_multi_return_measure);
+BENCHMARK(oolua_multi_return_lua_measure);
 BENCHMARK(oolua_stateful_function_object_measure);
 BENCHMARK(oolua_base_derived_measure);
 BENCHMARK(oolua_return_userdata_measure);

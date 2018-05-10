@@ -190,7 +190,7 @@ void plain_c_lua_function_measure(benchmark::State& benchmark_state) {
 	}
 }
 
-void plain_c_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void plain_c_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
@@ -365,7 +365,7 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
-void plain_c_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void plain_c_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
@@ -563,13 +563,13 @@ BENCHMARK(plain_c_table_set_measure);
 BENCHMARK(plain_c_table_chained_get_measure);
 BENCHMARK(plain_c_table_chained_set_measure);
 BENCHMARK(plain_c_c_function_measure);
-BENCHMARK(plain_c_c_through_lua_function_measure);
+BENCHMARK(plain_c_lua_function_through_c_measure);
 BENCHMARK(plain_c_lua_function_measure);
 BENCHMARK(plain_c_member_function_call_measure);
 BENCHMARK(plain_c_userdata_variable_access_measure);
 BENCHMARK(plain_c_userdata_variable_access_large_measure);
 BENCHMARK(plain_c_userdata_variable_access_last_measure);
-BENCHMARK(plain_c_lua_multi_return_measure);
+BENCHMARK(plain_c_multi_return_lua_measure);
 BENCHMARK(plain_c_multi_return_measure);
 BENCHMARK(plain_c_stateful_function_object_measure);
 BENCHMARK(plain_c_base_derived_measure);

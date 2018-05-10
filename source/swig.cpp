@@ -86,7 +86,7 @@ void swig_lua_function_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
-void swig_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void swig_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
@@ -186,7 +186,7 @@ void swig_multi_return_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
-void swig_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void swig_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
@@ -274,7 +274,7 @@ BENCHMARK(swig_table_set_measure);
 BENCHMARK(swig_table_chained_get_measure);
 BENCHMARK(swig_table_chained_set_measure);
 BENCHMARK(swig_c_function_measure);
-BENCHMARK(swig_c_through_lua_function_measure);
+BENCHMARK(swig_lua_function_through_c_measure);
 BENCHMARK(swig_lua_function_measure);
 BENCHMARK(swig_member_function_call_measure);
 BENCHMARK(swig_userdata_variable_access_measure);

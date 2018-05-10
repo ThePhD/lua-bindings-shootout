@@ -192,7 +192,7 @@ void lua_api_pp_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void lua_api_pp_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void lua_api_pp_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	lua::State l;
 	lua_atpanic(l.getRawState(), lbs::panic_throw);
 
@@ -288,7 +288,7 @@ void lua_api_pp_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
-void lua_api_pp_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void lua_api_pp_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	lua::State l;
 	lua_atpanic(l.getRawState(), lbs::panic_throw);
 
@@ -419,13 +419,13 @@ BENCHMARK(lua_api_pp_table_set_measure);
 BENCHMARK(lua_api_pp_table_chained_get_measure);
 BENCHMARK(lua_api_pp_table_chained_set_measure);
 BENCHMARK(lua_api_pp_c_function_measure);
-BENCHMARK(lua_api_pp_c_through_lua_function_measure);
+BENCHMARK(lua_api_pp_lua_function_through_c_measure);
 BENCHMARK(lua_api_pp_lua_function_measure);
 BENCHMARK(lua_api_pp_member_function_call_measure);
 BENCHMARK(lua_api_pp_userdata_variable_access_measure);
 BENCHMARK(lua_api_pp_userdata_variable_access_large_measure);
 BENCHMARK(lua_api_pp_userdata_variable_access_last_measure);
-BENCHMARK(lua_api_pp_lua_multi_return_measure);
+BENCHMARK(lua_api_pp_multi_return_lua_measure);
 BENCHMARK(lua_api_pp_multi_return_measure);
 BENCHMARK(lua_api_pp_stateful_function_object_measure);
 BENCHMARK(lua_api_pp_base_derived_measure);

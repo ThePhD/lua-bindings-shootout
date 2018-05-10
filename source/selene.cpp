@@ -138,7 +138,7 @@ void selene_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void selene_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void selene_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
@@ -216,7 +216,7 @@ void selene_stateful_function_object_measure(benchmark::State& benchmark_state) 
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void selene_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void selene_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	sel::State lua{ true };
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
@@ -362,13 +362,13 @@ BENCHMARK(selene_table_set_measure);
 BENCHMARK(selene_table_chained_get_measure);
 BENCHMARK(selene_table_chained_set_measure);
 BENCHMARK(selene_c_function_measure);
-BENCHMARK(selene_c_through_lua_function_measure);
+BENCHMARK(selene_lua_function_through_c_measure);
 BENCHMARK(selene_lua_function_measure);
 BENCHMARK(selene_member_function_call_measure);
 BENCHMARK(selene_userdata_variable_access_measure);
 BENCHMARK(selene_userdata_variable_access_large_measure);
 BENCHMARK(selene_userdata_variable_access_last_measure);
-BENCHMARK(selene_lua_multi_return_measure);
+BENCHMARK(selene_multi_return_lua_measure);
 BENCHMARK(selene_multi_return_measure);
 BENCHMARK(selene_stateful_function_object_measure);
 BENCHMARK(selene_base_derived_measure);

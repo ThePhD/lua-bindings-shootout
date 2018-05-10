@@ -33,6 +33,7 @@
 #include <unordered_map>
 #include <tuple>
 #include <memory>
+#include <cstring>
 
 namespace lbs {
 

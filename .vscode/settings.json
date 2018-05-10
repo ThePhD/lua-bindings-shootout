@@ -1,6 +1,7 @@
 {
 	"cmake.configureSettings": {
-		"BUILD_SHARED_LIBS": true
+		"BUILD_SHARED_LIBS": true,
+		"BOOST_ROOT": "D:\\local\\boost_1_65_1",
 	},
 	"python.linting.mypyEnabled": true,
 	"python.formatting.provider": "yapf",

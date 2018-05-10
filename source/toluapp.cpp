@@ -96,7 +96,7 @@ void toluapp_lua_function_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
-void toluapp_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void toluapp_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	// No table abstraction
 	lbs::unsupported(benchmark_state);
 	return;
@@ -280,7 +280,7 @@ BENCHMARK(toluapp_table_set_measure);
 BENCHMARK(toluapp_table_chained_get_measure);
 BENCHMARK(toluapp_table_chained_set_measure);
 BENCHMARK(toluapp_c_function_measure);
-BENCHMARK(toluapp_c_through_lua_function_measure);
+BENCHMARK(toluapp_lua_function_through_c_measure);
 BENCHMARK(toluapp_lua_function_measure);
 BENCHMARK(toluapp_member_function_call_measure);
 BENCHMARK(toluapp_userdata_variable_access_measure);

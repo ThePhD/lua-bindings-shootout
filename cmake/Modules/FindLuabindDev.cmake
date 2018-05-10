@@ -85,9 +85,9 @@ if (luabind_lib_shared MATCHES "SHARED")
 endif()
 target_compile_definitions(${luabind_lib}
 	PUBLIC
-	$<$<CONFIG:Release>:"LUABIND_NO_ERROR_CHECKING=1">
-	$<$<CONFIG:MinSizeRel>:"LUABIND_NO_ERROR_CHECKING=1">
-	$<$<CONFIG:RelWithDebInfo>:"LUABIND_NO_ERROR_CHECKING=1">
+	$<$<CONFIG:Release>:LUABIND_NO_ERROR_CHECKING=1>
+	$<$<CONFIG:MinSizeRel>:LUABIND_NO_ERROR_CHECKING=1>
+	$<$<CONFIG:RelWithDebInfo>:LUABIND_NO_ERROR_CHECKING=1>
 )
 
 if (CMAKE_DL_LIBS)

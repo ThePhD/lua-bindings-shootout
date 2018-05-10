@@ -160,7 +160,7 @@ void lua_intf_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void lua_intf_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void lua_intf_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
@@ -401,7 +401,7 @@ void lua_intf_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
-void lua_intf_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void lua_intf_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_State* L = lua;
 	lua_atpanic(lua, lbs::panic_throw);
@@ -553,7 +553,7 @@ BENCHMARK(lua_intf_table_set_measure);
 BENCHMARK(lua_intf_table_chained_get_measure);
 BENCHMARK(lua_intf_table_chained_set_measure);
 BENCHMARK(lua_intf_c_function_measure);
-BENCHMARK(lua_intf_c_through_lua_function_measure);
+BENCHMARK(lua_intf_lua_function_through_c_measure);
 BENCHMARK(lua_intf_lua_function_measure);
 BENCHMARK(lua_intf_member_function_call_measure);
 BENCHMARK(lua_intf_userdata_variable_access_measure);

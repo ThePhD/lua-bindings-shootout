@@ -1,7 +1,7 @@
 // lua bindings shootout
 // The MIT License (MIT)
 
-// Copyright © 2018 ThePhD
+// Copyright ï¿½ 2018 ThePhD
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -156,7 +156,8 @@ void luacppinterface_lua_function_measure(benchmark::State& benchmark_state) {
 
 	if (l.RunScript(R"(function f (i)
 			return i;
-		end)") != "No errors") {
+		end)")
+		!= "No errors") {
 		lua_error(lua.GetState().get());
 	}
 
@@ -169,7 +170,7 @@ void luacppinterface_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luacppinterface_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void luacppinterface_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	Lua l;
 	auto lua = l.GetGlobalEnvironment();
 	lua_State* L = lua.GetState().get();
@@ -249,7 +250,7 @@ void luacppinterface_multi_return_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
-void luacppinterface_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void luacppinterface_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
@@ -303,7 +304,6 @@ void luacppinterface_return_userdata_measure(benchmark::State& benchmark_state) 
 	lua.Set("h", l.CreateFunction<double(LuaUserdata<lbs::basic>)>([&](LuaUserdata<lbs::basic> b) -> double {
 		return lbs::basic_get_var(*b.RetrieveData());
 	}));
-
 	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
 
 	std::string code = lbs::repeated_code(lbs::return_userdata_code);
@@ -345,14 +345,14 @@ BENCHMARK(luacppinterface_table_set_measure);
 BENCHMARK(luacppinterface_table_chained_get_measure);
 BENCHMARK(luacppinterface_table_chained_set_measure);
 BENCHMARK(luacppinterface_c_function_measure);
-BENCHMARK(luacppinterface_c_through_lua_function_measure);
+BENCHMARK(luacppinterface_lua_function_through_c_measure);
 BENCHMARK(luacppinterface_lua_function_measure);
 BENCHMARK(luacppinterface_member_function_call_measure);
 BENCHMARK(luacppinterface_userdata_variable_access_measure);
 BENCHMARK(luacppinterface_userdata_variable_access_large_measure);
 BENCHMARK(luacppinterface_userdata_variable_access_last_measure);
 BENCHMARK(luacppinterface_multi_return_measure);
-BENCHMARK(luacppinterface_lua_multi_return_measure);
+BENCHMARK(luacppinterface_multi_return_lua_measure);
 BENCHMARK(luacppinterface_stateful_function_object_measure);
 BENCHMARK(luacppinterface_base_derived_measure);
 BENCHMARK(luacppinterface_return_userdata_measure);

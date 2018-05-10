@@ -163,7 +163,7 @@ void luabridge_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luabridge_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void luabridge_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
@@ -429,7 +429,7 @@ void luabridge_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
-void luabridge_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void luabridge_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
@@ -597,14 +597,14 @@ BENCHMARK(luabridge_table_set_measure);
 BENCHMARK(luabridge_table_chained_get_measure);
 BENCHMARK(luabridge_table_chained_set_measure);
 BENCHMARK(luabridge_c_function_measure);
-BENCHMARK(luabridge_c_through_lua_function_measure);
+BENCHMARK(luabridge_lua_function_through_c_measure);
 BENCHMARK(luabridge_lua_function_measure);
 BENCHMARK(luabridge_member_function_call_measure);
 BENCHMARK(luabridge_userdata_variable_access_measure);
 BENCHMARK(luabridge_userdata_variable_access_large_measure);
 BENCHMARK(luabridge_userdata_variable_access_last_measure);
 BENCHMARK(luabridge_multi_return_measure);
-BENCHMARK(luabridge_lua_multi_return_measure);
+BENCHMARK(luabridge_multi_return_lua_measure);
 BENCHMARK(luabridge_stateful_function_object_measure);
 BENCHMARK(luabridge_base_derived_measure);
 BENCHMARK(luabridge_return_userdata_measure);

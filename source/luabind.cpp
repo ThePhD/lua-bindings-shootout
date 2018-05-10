@@ -153,7 +153,7 @@ void luabind_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luabind_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void luabind_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 	luabind::open(L);
@@ -400,7 +400,7 @@ void luabind_multi_return_measure(benchmark::State& benchmark_state) {
 	}
 }
 
-void luabind_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void luabind_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	// Unsupported.
 	// The irony.
 	// This was supported in defunct, vanilla LuaBind,
@@ -554,13 +554,13 @@ BENCHMARK(luabind_table_set_measure);
 BENCHMARK(luabind_table_chained_get_measure);
 BENCHMARK(luabind_table_chained_set_measure);
 BENCHMARK(luabind_c_function_measure);
-BENCHMARK(luabind_c_through_lua_function_measure);
+BENCHMARK(luabind_lua_function_through_c_measure);
 BENCHMARK(luabind_lua_function_measure);
 BENCHMARK(luabind_member_function_call_measure);
 BENCHMARK(luabind_userdata_variable_access_measure);
 BENCHMARK(luabind_userdata_variable_access_large_measure);
 BENCHMARK(luabind_userdata_variable_access_last_measure);
-BENCHMARK(luabind_lua_multi_return_measure);
+BENCHMARK(luabind_multi_return_lua_measure);
 BENCHMARK(luabind_multi_return_measure);
 BENCHMARK(luabind_stateful_function_object_measure);
 BENCHMARK(luabind_base_derived_measure);

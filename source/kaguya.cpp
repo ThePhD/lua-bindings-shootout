@@ -153,7 +153,7 @@ void kaguya_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void kaguya_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void kaguya_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
@@ -227,7 +227,7 @@ void kaguya_stateful_function_object_measure(benchmark::State& benchmark_state) 
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void kaguya_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void kaguya_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua_State* L = lua.state();
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
@@ -400,7 +400,7 @@ BENCHMARK(kaguya_table_set_measure);
 BENCHMARK(kaguya_table_chained_get_measure);
 BENCHMARK(kaguya_table_chained_set_measure);
 BENCHMARK(kaguya_c_function_measure);
-BENCHMARK(kaguya_c_through_lua_function_measure);
+BENCHMARK(kaguya_lua_function_through_c_measure);
 BENCHMARK(kaguya_lua_function_measure);
 BENCHMARK(kaguya_member_function_call_measure);
 BENCHMARK(kaguya_userdata_variable_access_measure);

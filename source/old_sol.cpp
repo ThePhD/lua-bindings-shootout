@@ -155,7 +155,7 @@ void old_sol_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void old_sol_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void old_sol_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
@@ -383,7 +383,7 @@ void old_sol_multi_return_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
-void old_sol_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void old_sol_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua.open_libraries();
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
@@ -501,14 +501,14 @@ BENCHMARK(old_sol_table_set_measure);
 BENCHMARK(old_sol_table_chained_get_measure);
 BENCHMARK(old_sol_table_chained_set_measure);
 BENCHMARK(old_sol_c_function_measure);
-BENCHMARK(old_sol_c_through_lua_function_measure);
+BENCHMARK(old_sol_lua_function_through_c_measure);
 BENCHMARK(old_sol_lua_function_measure);
 BENCHMARK(old_sol_member_function_call_measure);
 BENCHMARK(old_sol_userdata_variable_access_measure);
 BENCHMARK(old_sol_userdata_variable_access_large_measure);
 BENCHMARK(old_sol_userdata_variable_access_last_measure);
 BENCHMARK(old_sol_multi_return_measure);
-BENCHMARK(old_sol_lua_multi_return_measure);
+BENCHMARK(old_sol_multi_return_lua_measure);
 BENCHMARK(old_sol_stateful_function_object_measure);
 BENCHMARK(old_sol_base_derived_measure);
 BENCHMARK(old_sol_return_userdata_measure);

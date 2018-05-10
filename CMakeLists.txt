@@ -33,21 +33,21 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
 # # Options
 # whether or not we should build as 32-bit
-if (CMAKE_SIZEOF_VOID_P EQUAL 4 OR LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS)
-	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS ON CACHE BOOL "Enable a 32-bit build.")
+if (CMAKE_SIZEOF_VOID_P EQUAL 4 OR LB_SHOOTOUT_BUILD_32_BITS)
+	set(LB_SHOOTOUT_BUILD_32_BITS ON CACHE BOOL "Enable a 32-bit build.")
 	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/bin")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x86/${CFG_INT_DIR}/lib")
 else()
-	set(LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS OFF CACHE BOOL "Enable a 32-bit build.")
+	set(LB_SHOOTOUT_BUILD_32_BITS OFF CACHE BOOL "Enable a 32-bit build.")
 	set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
 	set(CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/bin")
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/x64/${CFG_INT_DIR}/lib")
-endif(CMAKE_SIZEOF_VOID_P EQUAL 4 OR LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS)
+endif(CMAKE_SIZEOF_VOID_P EQUAL 4 OR LB_SHOOTOUT_BUILD_32_BITS)
 
 # # Get Lua Build through find_package
 # Wrap it in shared specifiers...
@@ -77,7 +77,7 @@ set(BENCHMARK_ENABLE_EXCEPTIONS ON CACHE INTERNAL "Enable the use of exceptions 
 set(BENCHMARK_ENABLE_TESTING OFF CACHE INTERNAL "Enable testing of the benchmark library." FORCE)
 set(BENCHMARK_ENABLE_LTO OFF CACHE INTERNAL "Enable link time optimisation of the benchmark library." FORCE)
 set(BENCHMARK_USE_LIBCXX OFF CACHE INTERNAL "Build and test using libc++ as the standard library." FORCE)
-set(BENCHMARK_BUILD_32_BITS ${LUA_BINDINGS_SHOOTOUT_BUILD_32_BITS} CACHE INTERNAL "Build a 32 bit version of the library." FORCE)
+set(BENCHMARK_BUILD_32_BITS ${LB_SHOOTOUT_BUILD_32_BITS} CACHE INTERNAL "Build a 32 bit version of the library." FORCE)
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE INTERNAL "Enable installation of benchmark. (Projects embedding benchmark may want to turn this OFF.)" FORCE)
 set(BENCHMARK_DOWNLOAD_DEPENDENCIES OFF CACHE INTERNAL "Allow the downloading and in-tree building of unmet dependencies" FORCE)
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE INTERNAL "Enable building the unit tests which depend on gtest" FORCE)
@@ -154,4 +154,55 @@ target_include_directories(lua_bindings_shootout
 	PRIVATE
 	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2"
 	"${CMAKE_CURRENT_SOURCE_DIR}/vendor/old_sol"
+)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+	target_compile_options(lua_bindings_shootout
+		PRIVATE -ftemplate-depth=2048
+	)
+endif()
+
+set(LB_SHOOTOUT_REPETITIONS 1000
+	CACHE STRING "The number of times to re-rerun the benchmarks to gather additional data"
+)
+set(LB_SHOOTOUT_FORMAT json 
+	CACHE STRING "The output format of the data. Must be json or csv")
+string(TOLOWER ${LB_SHOOTOUT_FORMAT} LB_SHOOTOUT_FORMAT_LOWER)
+set(LB_SHOOTOUT_FORMAT ${LB_SHOOTOUT_FORMAT_LOWER} 
+	CACHE STRING "The output format of the data. Must be json or csv" FORCE)
+
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark_results")
+set(LB_SHOOTOUT_OUTFILE "${CMAKE_BINARY_DIR}/benchmark_results/lua_bindings_shootout.reset.${LB_SHOOTOUT_FORMAT}")
+set(LB_SHOOTOUT_GRAPH_OUTFILE "${CMAKE_BINARY_DIR}/benchmark_results/lua_bindings_shootout.reset.png")
+
+add_custom_target(run_shootout
+	COMMAND lua_bindings_shootout "--benchmark_out=${LB_SHOOTOUT_OUTFILE}" "--benchmark_out_format=${LB_SHOOTOUT_FORMAT}" "--benchmark_repetitions=${LB_SHOOTOUT_REPETITIONS}" "--benchmark_filter=reset"
+	COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/benchmarks/tools/generate_graphs.py" 
+		"--input=${LB_SHOOTOUT_OUTFILE}"
+		"--input_format=${LB_SHOOTOUT_FORMAT}"
+		"--output=${LB_SHOOTOUT_GRAPH_OUTFILE}"
+		"--categories=global_string_get_measure,
+		global_string_set_measure,
+		table_get_measure,
+		table_set_measure,
+		table_chained_get_measure,
+		table_chained_set_measure,
+		c_function_measure,
+		lua_function_through_c_measure,
+		lua_function_measure,
+		member_function_call_measure,
+		userdata_variable_access_measure,
+		userdata_variable_access_large_measure,
+		userdata_variable_access_last_measure,
+		multi_return_lua_measure,
+		multi_return_measure,
+		stateful_function_object_measure,
+		base_derived_measure,
+		return_userdata_measure,
+		optional_success_measure,
+		optional_half_failure_measure,
+		optional_failure_measure,
+		implicit_inheritance_measure"
+	DEPENDS lua_bindings_shootout
+	BYPRODUCTS ${LB_SHOOTOUT_OUTFILE} ${LB_SHOOTOUT_GRAPH_OUTFILE}
+	COMMENT "Executing Benchmarks and outputting to '${LB_SHOOTOUT_OUTFILE}' then running graphs for '${LB_SHOOTOUT_GRAPH_OUTFILE}'"
 )

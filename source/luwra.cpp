@@ -164,7 +164,7 @@ void luwra_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luwra_c_through_lua_function_measure(benchmark::State& benchmark_state) {
+void luwra_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 	luwra::StateWrapper lua;
 	lua_State* L = lua.state.get();
 	lua_atpanic(lua, lbs::panic_throw);
@@ -259,7 +259,7 @@ void luwra_stateful_function_object_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luwra_lua_multi_return_measure(benchmark::State& benchmark_state) {
+void luwra_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	luwra::StateWrapper lua;
 	lua_State* L = lua.state.get();
 	luaL_openlibs(L);
@@ -322,19 +322,19 @@ void luwra_base_derived_measure(benchmark::State& benchmark_state) {
 	// Set and verify correctness
 	lua.set("b", &ab);
 	{
-		lbs::complex_base_a& va = lua["b"].read<lbs::complex_base_a>();
-		lbs::complex_base_b& vb = lua["b"].read<lbs::complex_base_b>();
-		if (!lbs::verify_base_correctness(va, vb, ab)) {
+		lbs::complex_base_a* va = lua["b"].read<lbs::complex_base_a*>();
+		lbs::complex_base_b* vb = lua["b"].read<lbs::complex_base_b*>();
+		if (!lbs::verify_base_correctness(*va, *vb, ab)) {
 			lbs::unsupported(benchmark_state);
 			return;
 		}
 	}
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		lbs::complex_base_a& va = lua["b"].read<lbs::complex_base_a>();
-		lbs::complex_base_b& vb = lua["b"].read<lbs::complex_base_b>();
-		x += va.a_func();
-		x += vb.b_func();
+		lbs::complex_base_a* va = lua["b"].read<lbs::complex_base_a*>();
+		lbs::complex_base_b* vb = lua["b"].read<lbs::complex_base_b*>();
+		x += va->a_func();
+		x += vb->b_func();
 	}
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 2));
 }
@@ -437,13 +437,13 @@ BENCHMARK(luwra_table_set_measure);
 BENCHMARK(luwra_table_chained_get_measure);
 BENCHMARK(luwra_table_chained_set_measure);
 BENCHMARK(luwra_c_function_measure);
-BENCHMARK(luwra_c_through_lua_function_measure);
+BENCHMARK(luwra_lua_function_through_c_measure);
 BENCHMARK(luwra_lua_function_measure);
 BENCHMARK(luwra_member_function_call_measure);
 BENCHMARK(luwra_userdata_variable_access_measure);
 BENCHMARK(luwra_userdata_variable_access_large_measure);
 BENCHMARK(luwra_userdata_variable_access_last_measure);
-BENCHMARK(luwra_lua_multi_return_measure);
+BENCHMARK(luwra_multi_return_lua_measure);
 BENCHMARK(luwra_multi_return_measure);
 BENCHMARK(luwra_stateful_function_object_measure);
 BENCHMARK(luwra_base_derived_measure);
