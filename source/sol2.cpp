@@ -28,7 +28,7 @@
 #include "lbs_lib.hpp"
 #include "lbs_lua.hpp"
 
-void sol2_global_string_get_measure(benchmark::State& benchmark_state) {
+void sol2_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	sol2::state lua;
 	lua["value"] = lbs::magic_value();
 	double x = 0;
@@ -39,7 +39,7 @@ void sol2_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void sol2_global_string_set_measure(benchmark::State& benchmark_state) {
+void sol2_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	sol2::state lua(lbs::panic_throw);
 	double v = 0;
 	for (auto _ : benchmark_state) {
@@ -122,7 +122,7 @@ void sol2_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void sol2_lua_function_measure(benchmark::State& benchmark_state) {
+void sol2_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	sol2::state lua(lbs::panic_throw);
 	lua.script(R"(function f (i)
 		return i;
@@ -136,7 +136,7 @@ void sol2_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void sol2_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void sol2_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	sol2::state lua(lbs::panic_throw);
 	lua.set_function("f", sol2::c_call<decltype(&lbs::basic_call), &lbs::basic_call>);
 	sol2::function f = lua["f"];
@@ -481,15 +481,15 @@ void sol2_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(sol2_global_string_get_measure);
-BENCHMARK(sol2_global_string_set_measure);
+BENCHMARK(sol2_table_global_string_get_measure);
+BENCHMARK(sol2_table_global_string_set_measure);
 BENCHMARK(sol2_table_get_measure);
 BENCHMARK(sol2_table_set_measure);
 BENCHMARK(sol2_table_chained_get_measure);
 BENCHMARK(sol2_table_chained_set_measure);
 BENCHMARK(sol2_c_function_measure);
-BENCHMARK(sol2_lua_function_through_c_measure);
-BENCHMARK(sol2_lua_function_measure);
+BENCHMARK(sol2_c_function_through_lua_in_c_measure);
+BENCHMARK(sol2_lua_function_in_c_measure);
 BENCHMARK(sol2_member_function_call_measure);
 BENCHMARK(sol2_userdata_variable_access_measure);
 BENCHMARK(sol2_userdata_variable_access_large_measure);

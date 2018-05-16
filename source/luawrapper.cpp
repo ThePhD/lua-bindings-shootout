@@ -40,7 +40,7 @@ static lua_State* get_luawrapper_main_state(LuaContext& lua, bool open_libs = fa
 	return L;
 }
 
-void luawrapper_global_string_get_measure(benchmark::State& benchmark_state) {
+void luawrapper_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
 
@@ -53,7 +53,7 @@ void luawrapper_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luawrapper_global_string_set_measure(benchmark::State& benchmark_state) {
+void luawrapper_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
 
@@ -166,7 +166,7 @@ void luawrapper_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void luawrapper_lua_function_measure(benchmark::State& benchmark_state) {
+void luawrapper_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
 
@@ -183,7 +183,7 @@ void luawrapper_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luawrapper_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void luawrapper_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
 
@@ -494,15 +494,15 @@ void luawrapper_implicit_inheritance_measure(benchmark::State& benchmark_state) 
 
 
 
-BENCHMARK(luawrapper_global_string_get_measure);
-BENCHMARK(luawrapper_global_string_set_measure);
+BENCHMARK(luawrapper_table_global_string_get_measure);
+BENCHMARK(luawrapper_table_global_string_set_measure);
 BENCHMARK(luawrapper_table_get_measure);
 BENCHMARK(luawrapper_table_set_measure);
 BENCHMARK(luawrapper_table_chained_get_measure);
 BENCHMARK(luawrapper_table_chained_set_measure);
 BENCHMARK(luawrapper_c_function_measure);
-BENCHMARK(luawrapper_lua_function_through_c_measure);
-BENCHMARK(luawrapper_lua_function_measure);
+BENCHMARK(luawrapper_c_function_through_lua_in_c_measure);
+BENCHMARK(luawrapper_lua_function_in_c_measure);
 BENCHMARK(luawrapper_member_function_call_measure);
 BENCHMARK(luawrapper_userdata_variable_access_measure);
 BENCHMARK(luawrapper_userdata_variable_access_large_measure);

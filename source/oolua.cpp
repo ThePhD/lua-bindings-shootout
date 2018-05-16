@@ -87,7 +87,7 @@ OOLUA_CFUNC(lbs::basic_return, oo_basic_return)
 static const std::string oolua_f = "f";
 static const std::string oolua_h = "h";
 
-void oolua_global_string_get_measure(benchmark::State& benchmark_state) {
+void oolua_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
@@ -102,7 +102,7 @@ void oolua_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void oolua_global_string_set_measure(benchmark::State& benchmark_state) {
+void oolua_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
@@ -232,7 +232,7 @@ void oolua_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void oolua_lua_function_measure(benchmark::State& benchmark_state) {
+void oolua_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
@@ -251,7 +251,7 @@ void oolua_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void oolua_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void oolua_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
@@ -501,15 +501,15 @@ void oolua_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(oolua_global_string_get_measure);
-BENCHMARK(oolua_global_string_set_measure);
+BENCHMARK(oolua_table_global_string_get_measure);
+BENCHMARK(oolua_table_global_string_set_measure);
 BENCHMARK(oolua_table_get_measure);
 BENCHMARK(oolua_table_set_measure);
 BENCHMARK(oolua_table_chained_get_measure);
 BENCHMARK(oolua_table_chained_set_measure);
 BENCHMARK(oolua_c_function_measure);
-BENCHMARK(oolua_lua_function_through_c_measure);
-BENCHMARK(oolua_lua_function_measure);
+BENCHMARK(oolua_c_function_through_lua_in_c_measure);
+BENCHMARK(oolua_lua_function_in_c_measure);
 BENCHMARK(oolua_member_function_call_measure);
 BENCHMARK(oolua_userdata_variable_access_measure);
 BENCHMARK(oolua_userdata_variable_access_large_measure);

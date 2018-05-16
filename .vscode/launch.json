@@ -8,20 +8,53 @@
 			"name": "Generate Graphs",
 			"type": "python",
 			"request": "launch",
-			"program": "${file}",
-			"console": "integratedTerminal"
+			"program": "${workspaceFolder}/tools/generate_graphs.py",
+			"console": "integratedTerminal",
+			"args": [
+				"--input=benchmark_results/lua_bindings_shootout.Desktop.json",
+				"--input_format=json",
+				"--output_dir=benchmark_results",
+				"--categories",
+				"global_string_get_measure",
+				"global_string_set_measure",
+				"table_get_measure",
+				"table_set_measure",
+				"table_chained_get_measure",
+				"table_chained_set_measure",
+				"c_function_measure",
+				"c_function_through_lua_in_c_measure",
+				"lua_function_in_c_measure",
+				"member_function_call_measure",
+				"userdata_variable_access_measure",
+				"userdata_variable_access_large_measure",
+				"userdata_variable_access_last_measure",
+				"multi_return_lua_measure",
+				"multi_return_measure",
+				"stateful_function_object_measure",
+				"base_derived_measure",
+				"return_userdata_measure",
+				"optional_success_measure",
+				"optional_half_failure_measure",
+				"optional_failure_measure",
+				"implicit_inheritance_measure"
+			]
 		},
 		{
-			"name": "Debug (Windows)",
+			"name": "Run",
 			"type": "cppvsdbg",
 			"request": "launch",
 			"preLaunchTask": "cmake build",
 			"program": "${command:cmake.launchTargetPath}",
-			"args": [],
+			"args": [
+				"--benchmark_out=${workspaceFolder}/benchmark_results/lua_bindings_shootout.test.json",
+				"--benchmark_out_format=json",
+				"--benchmark_repetitions=5",
+				"--benchmark_report_aggregates_only=false",
+			],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
-			"externalConsole": true
+			"internalConsoleOptions": "openOnSessionStart",
 		}
 	]
 }

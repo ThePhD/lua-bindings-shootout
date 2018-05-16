@@ -26,13 +26,13 @@
 #include "lbs_lua.hpp"
 #include "lbs_lib.hpp"
 
-void lua_intf_global_string_get_measure(benchmark::State& benchmark_state) {
+void lua_intf_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
-	
+
 	std::string precode = "value = " + lbs::magic_value_string();
 	lua.doString(precode.c_str());
-	
+
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua.getGlobal<double>("value");
@@ -41,7 +41,7 @@ void lua_intf_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void lua_intf_global_string_set_measure(benchmark::State& benchmark_state) {
+void lua_intf_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
@@ -65,7 +65,7 @@ void lua_intf_table_chained_get_measure(benchmark::State& benchmark_state) {
 
 	std::string precode = "ulahibe = {warble = {value = " + lbs::magic_value_string() + "}}";
 	lua.doString(precode.c_str());
-	
+
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua.getGlobal<double>("ulahibe.warble.value");
@@ -146,7 +146,7 @@ void lua_intf_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void lua_intf_lua_function_measure(benchmark::State& benchmark_state) {
+void lua_intf_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
@@ -160,7 +160,7 @@ void lua_intf_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void lua_intf_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void lua_intf_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	LuaIntf::LuaContext lua;
 	lua_atpanic(lua, lbs::panic_throw);
 
@@ -546,20 +546,21 @@ void lua_intf_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(lua_intf_global_string_get_measure);
-BENCHMARK(lua_intf_global_string_set_measure);
+BENCHMARK(lua_intf_table_global_string_get_measure);
+BENCHMARK(lua_intf_table_global_string_set_measure);
 BENCHMARK(lua_intf_table_get_measure);
 BENCHMARK(lua_intf_table_set_measure);
 BENCHMARK(lua_intf_table_chained_get_measure);
 BENCHMARK(lua_intf_table_chained_set_measure);
 BENCHMARK(lua_intf_c_function_measure);
-BENCHMARK(lua_intf_lua_function_through_c_measure);
-BENCHMARK(lua_intf_lua_function_measure);
+BENCHMARK(lua_intf_c_function_through_lua_in_c_measure);
+BENCHMARK(lua_intf_lua_function_in_c_measure);
 BENCHMARK(lua_intf_member_function_call_measure);
 BENCHMARK(lua_intf_userdata_variable_access_measure);
 BENCHMARK(lua_intf_userdata_variable_access_large_measure);
 BENCHMARK(lua_intf_userdata_variable_access_last_measure);
 BENCHMARK(lua_intf_multi_return_measure);
+BENCHMARK(lua_intf_multi_return_lua_measure);
 BENCHMARK(lua_intf_stateful_function_object_measure);
 BENCHMARK(lua_intf_base_derived_measure);
 BENCHMARK(lua_intf_return_userdata_measure);

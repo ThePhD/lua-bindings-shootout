@@ -26,7 +26,7 @@
 
 #include <selene.h>
 
-void selene_global_string_get_measure(benchmark::State& benchmark_state) {
+void selene_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 	lua["value"] = lbs::magic_value();
@@ -38,7 +38,7 @@ void selene_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void selene_global_string_set_measure(benchmark::State& benchmark_state) {
+void selene_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 	double v = 0;
@@ -121,7 +121,7 @@ void selene_c_function_measure(benchmark::State& benchmark_state) {
 	}
 }
 
-void selene_lua_function_measure(benchmark::State& benchmark_state) {
+void selene_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
@@ -138,7 +138,7 @@ void selene_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void selene_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void selene_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	sel::State lua;
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
@@ -355,15 +355,15 @@ void selene_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	}
 }
 
-BENCHMARK(selene_global_string_get_measure);
-BENCHMARK(selene_global_string_set_measure);
+BENCHMARK(selene_table_global_string_get_measure);
+BENCHMARK(selene_table_global_string_set_measure);
 BENCHMARK(selene_table_get_measure);
 BENCHMARK(selene_table_set_measure);
 BENCHMARK(selene_table_chained_get_measure);
 BENCHMARK(selene_table_chained_set_measure);
 BENCHMARK(selene_c_function_measure);
-BENCHMARK(selene_lua_function_through_c_measure);
-BENCHMARK(selene_lua_function_measure);
+BENCHMARK(selene_c_function_through_lua_in_c_measure);
+BENCHMARK(selene_lua_function_in_c_measure);
 BENCHMARK(selene_member_function_call_measure);
 BENCHMARK(selene_userdata_variable_access_measure);
 BENCHMARK(selene_userdata_variable_access_large_measure);

@@ -28,7 +28,7 @@
 #include "lbs_lib.hpp"
 #include "lbs_lua.hpp"
 
-void old_sol_global_string_get_measure(benchmark::State& benchmark_state) {
+void old_sol_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
@@ -41,7 +41,7 @@ void old_sol_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void old_sol_global_string_set_measure(benchmark::State& benchmark_state) {
+void old_sol_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
@@ -138,7 +138,7 @@ void old_sol_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void old_sol_lua_function_measure(benchmark::State& benchmark_state) {
+void old_sol_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
@@ -155,7 +155,7 @@ void old_sol_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void old_sol_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void old_sol_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	old_sol::state lua;
 	lua_atpanic(lua.lua_state(), lbs::panic_throw);
 
@@ -494,15 +494,15 @@ void old_sol_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::unsupported(benchmark_state);
 }
 
-BENCHMARK(old_sol_global_string_get_measure);
-BENCHMARK(old_sol_global_string_set_measure);
+BENCHMARK(old_sol_table_global_string_get_measure);
+BENCHMARK(old_sol_table_global_string_set_measure);
 BENCHMARK(old_sol_table_get_measure);
 BENCHMARK(old_sol_table_set_measure);
 BENCHMARK(old_sol_table_chained_get_measure);
 BENCHMARK(old_sol_table_chained_set_measure);
 BENCHMARK(old_sol_c_function_measure);
-BENCHMARK(old_sol_lua_function_through_c_measure);
-BENCHMARK(old_sol_lua_function_measure);
+BENCHMARK(old_sol_c_function_through_lua_in_c_measure);
+BENCHMARK(old_sol_lua_function_in_c_measure);
 BENCHMARK(old_sol_member_function_call_measure);
 BENCHMARK(old_sol_userdata_variable_access_measure);
 BENCHMARK(old_sol_userdata_variable_access_large_measure);

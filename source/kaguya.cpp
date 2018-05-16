@@ -26,7 +26,7 @@
 #include "lbs_lib.hpp"
 #include "lbs_lua.hpp"
 
-void kaguya_global_string_get_measure(benchmark::State& benchmark_state) {
+void kaguya_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
@@ -39,7 +39,7 @@ void kaguya_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void kaguya_global_string_set_measure(benchmark::State& benchmark_state) {
+void kaguya_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
@@ -137,7 +137,7 @@ void kaguya_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void kaguya_lua_function_measure(benchmark::State& benchmark_state) {
+void kaguya_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
@@ -153,7 +153,7 @@ void kaguya_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void kaguya_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void kaguya_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	kaguya::State lua;
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
@@ -233,7 +233,7 @@ void kaguya_multi_return_lua_measure(benchmark::State& benchmark_state) {
 	lua.setErrorHandler(lbs::kaguya_panic_throw);
 
 	lua["f"].setFunction(lbs::basic_multi_return);
-	
+
 	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
 
 	std::string code = lbs::repeated_code(lbs::lua_multi_return_code);
@@ -393,20 +393,21 @@ void kaguya_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(kaguya_global_string_get_measure);
-BENCHMARK(kaguya_global_string_set_measure);
+BENCHMARK(kaguya_table_global_string_get_measure);
+BENCHMARK(kaguya_table_global_string_set_measure);
 BENCHMARK(kaguya_table_get_measure);
 BENCHMARK(kaguya_table_set_measure);
 BENCHMARK(kaguya_table_chained_get_measure);
 BENCHMARK(kaguya_table_chained_set_measure);
 BENCHMARK(kaguya_c_function_measure);
-BENCHMARK(kaguya_lua_function_through_c_measure);
-BENCHMARK(kaguya_lua_function_measure);
+BENCHMARK(kaguya_c_function_through_lua_in_c_measure);
+BENCHMARK(kaguya_lua_function_in_c_measure);
 BENCHMARK(kaguya_member_function_call_measure);
 BENCHMARK(kaguya_userdata_variable_access_measure);
 BENCHMARK(kaguya_userdata_variable_access_large_measure);
 BENCHMARK(kaguya_userdata_variable_access_last_measure);
 BENCHMARK(kaguya_multi_return_measure);
+BENCHMARK(kaguya_multi_return_lua_measure);
 BENCHMARK(kaguya_stateful_function_object_measure);
 BENCHMARK(kaguya_base_derived_measure);
 BENCHMARK(kaguya_base_derived_measure);

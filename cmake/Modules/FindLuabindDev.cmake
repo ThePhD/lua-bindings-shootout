@@ -33,13 +33,30 @@ set(luabind_dev_toplevel "${CMAKE_BINARY_DIR}/vendor/luabind_${luabind_version}"
 set(luabind_include_dirs "${luabind_dev_toplevel}/")
 
 # # Luabind library sources
-file(GLOB_RECURSE luabind_sources 
-	LIST_DIRECTORIES false 
-	"${luabind_dev_toplevel}/src/*.cpp"
-	"${luabind_dev_toplevel}/src/*.c"
+set(luabind_sources 
+	class.cpp
+	class_info.cpp
+	class_registry.cpp
+	class_rep.cpp
+	create_class.cpp
+	error.cpp
+	exception_handler.cpp
+	function.cpp
+	function_introspection.cpp
+	inheritance.cpp
+	link_compatibility.cpp
+	object_rep.cpp
+	open.cpp
+	operator.cpp
+	pcall.cpp
+	scope.cpp
+	set_package_preload.cpp
+	stack_content_by_name.cpp
+	weak_ref.cpp
+	wrapper_base.cpp
 )
-#prepend(luabind_sources "${luabind_dev_toplevel}/src/" ${luabind_sources})
-list(APPEND luabind_sources "${luabind_dev_toplevel}/luabind/luabind.hpp")
+
+prepend(luabind_sources "${luabind_dev_toplevel}/src/" ${luabind_sources})
 
 # # External project to get sources
 ExternalProject_Add(LUABIND_DEV_SOURCE
@@ -62,7 +79,7 @@ ExternalProject_Add(LUABIND_DEV_SOURCE
 	BUILD_BYPRODUCTS "${luabind_sources}")
 
 set(luabind_lib luabind_lib_${luabind_version})
-add_library(${luabind_lib} ${luabind_sources})
+add_library(${luabind_lib} "${luabind_sources}")
 add_dependencies(${luabind_lib} LUABIND_DEV_SOURCE)
 set_target_properties(${luabind_lib} PROPERTIES
 	OUTPUT_NAME luabind-${luabind_version}

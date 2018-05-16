@@ -6,7 +6,7 @@
 #include "lbs_lua.hpp"
 #include "benchmark.hpp"
 
-void luabind_global_string_get_measure(benchmark::State& benchmark_state) {
+void luabind_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 	luabind::open(L);
@@ -23,7 +23,7 @@ void luabind_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luabind_global_string_set_measure(benchmark::State& benchmark_state) {
+void luabind_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 	luabind::open(L);
@@ -137,7 +137,7 @@ void luabind_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void luabind_lua_function_measure(benchmark::State& benchmark_state) {
+void luabind_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 	luabind::open(L);
@@ -153,7 +153,7 @@ void luabind_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luabind_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void luabind_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 	luabind::open(L);
@@ -547,15 +547,15 @@ void luabind_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
-BENCHMARK(luabind_global_string_get_measure);
-BENCHMARK(luabind_global_string_set_measure);
+BENCHMARK(luabind_table_global_string_get_measure);
+BENCHMARK(luabind_table_global_string_set_measure);
 BENCHMARK(luabind_table_get_measure);
 BENCHMARK(luabind_table_set_measure);
 BENCHMARK(luabind_table_chained_get_measure);
 BENCHMARK(luabind_table_chained_set_measure);
 BENCHMARK(luabind_c_function_measure);
-BENCHMARK(luabind_lua_function_through_c_measure);
-BENCHMARK(luabind_lua_function_measure);
+BENCHMARK(luabind_c_function_through_lua_in_c_measure);
+BENCHMARK(luabind_lua_function_in_c_measure);
 BENCHMARK(luabind_member_function_call_measure);
 BENCHMARK(luabind_userdata_variable_access_measure);
 BENCHMARK(luabind_userdata_variable_access_large_measure);

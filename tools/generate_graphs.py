@@ -35,37 +35,124 @@ import fnmatch
 import sys
 
 
-def parse_csv(c, data_point_names, time_scales):
+def name_sorter(b):
+	return b["name"]
+
+
+def aggregate_categories(all_benchmarks, data_point_names):
 	benchmarks = {}
-	benchmark_heuristics = {}
-	return benchmarks, benchmark_heuristics
+	# sort by mean
+	# so the actual ordering of graphs
+	# is lowest to highest
+	lower_is_better = data_point_names[0][1]
+
+	def mean_sorter(b):
+		if (b.get("error") != None):
+			return sys.float_info.max
+		mean_group = b["statistics"]["mean"]
+		data_point_name = data_point_names[0][0]
+		return mean_group[data_point_name]
+
+	for b in all_benchmarks:
+		category = b["category"]
+		if category not in benchmarks:
+			benchmarks[category] = {
+			    "benchmarks": [],
+			    "heuristics": {
+			        "min": sys.float_info.max,
+			        "max": sys.float_info.min
+			    }
+			}
+
+		target_category = benchmarks[category]
+		target_entries = target_category["benchmarks"]
+		target_heuristics = target_category["heuristics"]
+
+		target_entries.append(b)
+		target_heuristics["min"] = min(b["heuristics"]["min"],
+		                               target_heuristics["min"])
+		target_heuristics["max"] = max(b["heuristics"]["max"],
+		                               target_heuristics["max"])
+
+	for category_name in benchmarks:
+		category_benchmarks = benchmarks[category_name]
+		# first, sort by name so we can assign colors to each
+		# benchmark appropriately (and make those
+		# color assignments stable)
+		entries = category_benchmarks["benchmarks"]
+		entries.sort(key=name_sorter)
+		for bi, entry in enumerate(entries):
+			entry["name_index"] = bi
+			ci = entry["color_index"]
+			if (len(data_point_names) < 2):
+				dp = data_point_names[0]
+				ci[dp[0]] = bi
+			else:
+				for dpi, dp in enumerate(data_point_names):
+					ci[dp[0]] = dpi
+
+		# then, sort by mean
+		entries.sort(key=mean_sorter, reverse=lower_is_better)
+
+	return benchmarks
 
 
-def parse_json(j, data_point_names, time_scales):
+def parse_csv(c, data_point_names, time_scales, categories):
+	all_benchmarks = []
+
+	return aggregate_categories(all_benchmarks, data_point_names)
+
+
+def parse_json(j, data_point_names, time_scales, categories):
 	timescale_units = [x[0] for x in time_scales]
 
-	benchmarks = []
-	benchmark_heuristics = {
-	    "min": sys.float_info.max,
-	    "max": sys.float_info.min
-	}
+	all_benchmarks = []
 
 	j_benchmarks_array = j["benchmarks"]
 	for j_benchmark in j_benchmarks_array:
 		name = j_benchmark['name']
 		base_name = j_benchmark['base_name']
-		potential_targets = [b for b in benchmarks if b['name'] == base_name]
+		benchmark = None
+		potential_targets = [
+		    b for b in all_benchmarks if b['base_name'] == base_name
+		]
+		potential_categories = None if categories == None else [
+		    c for c in categories if c in base_name
+		]
+
+		category = ""
+		benchmark_name = base_name
+		if len(potential_categories) == 1:
+			category = potential_categories[0]
+			benchmark_name = base_name.replace(category, "").strip("_")
+
 		if (len(potential_targets) < 1):
-			benchmarks.append({
-			    "name": base_name,
+			all_benchmarks.append({
+			    "category": category,
+			    "name": benchmark_name,
+			    "base_name": base_name,
 			    "data": {},
 			    "statistics": {},
+			    "heuristics": {
+			        "max": sys.float_info.min,
+			        "min": sys.float_info.max,
+			    },
 			    "name_index": {},
-			    "color_index": {}
+			    "color_index": {},
+			    "error": None
 			})
-		benchmark = benchmarks[-1]
+			benchmark = all_benchmarks[-1]
+		else:
+			benchmark = potential_targets[-1]
 		data = benchmark["data"]
 		statistics = benchmark["statistics"]
+		heuristics = benchmark["heuristics"]
+		# check for errors
+		benchmark_error = j_benchmark.get('error_occurred')
+		if benchmark_error != None and benchmark_error:
+			benchmark["error"] = j_benchmark['error_message']
+			continue
+		# populate data
 		for point_name_lower in data_point_names:
 			point_name = point_name_lower[0]
 			if point_name not in data:
@@ -82,13 +169,11 @@ def parse_json(j, data_point_names, time_scales):
 				point = j_benchmark[point_name]
 				point_adjusted = point * to_seconds_multiplier
 				point_list.append(point_adjusted)
-				benchmark_heuristics["max"] = max(
-				    benchmark_heuristics["max"], point_adjusted)
-				benchmark_heuristics["min"] = min(
-				    benchmark_heuristics["min"], point_adjusted)
+				heuristics["min"] = min(heuristics["min"], point_adjusted)
+				heuristics["max"] = max(heuristics["max"], point_adjusted)
 		else:
 			# is a statistic
-			statistic_name = name.replace(base_name + "_", "")
+			statistic_name = name.replace(base_name, "").strip("_")
 			if statistic_name not in statistics:
 				statistics[statistic_name] = {}
 			statistic = statistics[statistic_name]
@@ -98,47 +183,25 @@ def parse_json(j, data_point_names, time_scales):
 				point_adjusted = point * to_seconds_multiplier
 				statistic[point_name] = point_adjusted
 
-	def name_sorter(b):
-		return b["name"]
-
-	def mean_sorter(b):
-		data_point_name_lower = data_point_names[0]
-		data_point_name = data_point_name_lower[0]
-		return b["statistics"]["mean"][data_point_name]
-
-	# first, sort by name so we can assign colors to each
-	# benchmark appropriately (and make those color assignments)
-	# stable
-	benchmarks.sort(key=name_sorter)
-	for bi, b in enumerate(benchmarks):
-		b["name_index"] = bi
-		ci = b["color_index"]
-		if (len(data_point_names) < 2):
-			dp = data_point_names[0]
-			ci[dp[0]] = bi
-		else:
-			for dpi, dp in enumerate(data_point_names):
-				ci[dp[0]] = dpi
-
-	# second, sort by mean
-	# so the actual benchmark
-	# ordering of graphs and the like
-	# is based on lowest to highest mean
-	lower_is_better = data_point_names[0][1]
-	benchmarks.sort(key=mean_sorter, reverse=lower_is_better)
-
-	return benchmarks, benchmark_heuristics
+	return aggregate_categories(all_benchmarks, data_point_names)
 
 
-def draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
+def draw_graph(name, category, benchmarks_heuristics, data_point_names,
                time_scales):
 	# initialize figures
 	figures, axes = plt.subplots()
 
+	# set name we're going to use
+	figure_name = name if name != None and len(name) > 0 else category.replace(
+	    "_", "")
+
 	# get the values of the time scale to perform bisecting
 	time_scale_values_from_seconds = [x[2] for x in time_scales]
-	benchmarks_max = benchmark_heuristics["max"]
-	benchmarks_min = benchmark_heuristics["min"]
+	benchmarks = benchmarks_heuristics["benchmarks"]
+	heuristics = benchmarks_heuristics["heuristics"]
+	benchmarks_max = heuristics["max"]
+	benchmarks_min = heuristics["min"]
+	absolute_range = benchmarks_max - benchmarks_min
 
 	# some pattern constants, to help us be pretty
 	# some color constants, to help us be pretty!
@@ -178,13 +241,14 @@ def draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
 	# draw mean-based bars with error indicators
 	# and draw scatter-plot points
 	for bi, benchmark in enumerate(benchmarks):
+		statistics = benchmark["statistics"]
 		for di, data_point_name_lower in enumerate(data_point_names):
 			data_point_name = data_point_name_lower[0]
 			bar_y = (bi * bar_all_sizes) + (di * bar_height) + (
 			    bar_padding * 0.5)
 			bar_y_positions.append(bar_y)
-			mean = benchmark["statistics"]["mean"][data_point_name]
-			stddev = benchmark["statistics"]["stddev"][data_point_name]
+			err = benchmark.get('error')
+
 			color_index = benchmark["color_index"][data_point_name]
 			aesthetics = data_point_aesthetics[color_index]
 			color = aesthetics[0]
@@ -192,7 +256,22 @@ def draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
 			    matplotlib.colors.hex2color(color))
 			colorhsv[2] *= 0.6
 			edgecolor = matplotlib.colors.hsv_to_rgb(colorhsv)
-			#color = 'green'
+
+			if err != None:
+				bars.append(
+				    axes.text(
+				        absolute_range * 0.02,
+				        bar_y + (quarter_bar_height * 2),
+				        err,
+				        color=color,
+				        style='italic',
+				        horizontalalignment='left',
+				        verticalalignment='center',
+				        fontsize='small'))
+				continue
+
+			mean = statistics["mean"][data_point_name]
+			stddev = statistics["stddev"][data_point_name]
 			hatch = aesthetics[1]
 			bar = axes.barh(
 			    bar_y,
@@ -240,8 +319,7 @@ def draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
 			return '{0:.0f}'.format(value * xscale[3])
 		return '{0:.2f}'.format(value * xscale[3])
 
-	absoluterange = benchmarks_max - benchmarks_min
-	axes.set_xlim([0, benchmarks_max + (absoluterange * 0.25)])
+	axes.set_xlim([0, benchmarks_max + (absolute_range * 0.25)])
 	axes.xaxis.set_major_formatter(
 	    mticker.FuncFormatter(time_axis_formatting))
 
@@ -249,10 +327,18 @@ def draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
 	# to text labels
 	y_ticks = [((y + 0.5) * bar_all_sizes)
 	           for y in range(0, int(len(bar_y_positions) / num_data_points))]
+	y_limits = [
+	    bar_y_positions[0] - bar_padding,
+	    bar_y_positions[-1] + bar_height + bar_padding
+	]
+
+	# set the tick spacing
 	axes.set_yticks(y_ticks)
-	# label each group (each cluster along the x axes)
+	# label each group (each cluster along the y axes)
 	# with the names of the benchmarks we ran
 	axes.set_yticklabels(benchmark_names)
+	# set the visual limits so we have good spacing
+	axes.set_ylim(y_limits)
 
 	# if we have 2 or more data points,
 	# a legend will help us label it all
@@ -276,7 +362,7 @@ def draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
 		                ' - ' + legend_text[1])
 
 	# set the benchmark name, typically derived from the file name
-	axes.set_title(name)
+	axes.set_title(figure_name)
 	# get a nice, clean layout
 	figures.tight_layout()
 
@@ -295,20 +381,30 @@ def main():
 	    '-i',
 	    '--input',
 	    nargs='?',
-	    default='ptrptr_benchmarks.json',
+	    default='lua_bindings_shootout.json',
 	    type=argparse.FileType('r'))
 	parser.add_argument('-f', '--input_format', nargs='?')
 	parser.add_argument('-o', '--output', nargs='?')
+	parser.add_argument('-d', '--output_dir', nargs='?')
 	parser.add_argument(
-	    '-d', '--data_point_names', nargs='+', default=['real_time'])
+	    '-p', '--data_point_names', nargs='+', default=['real_time'])
 	parser.add_argument('-l', '--lower', nargs='+', default=['real_time'])
+	parser.add_argument('-c', '--categories', nargs='+', default=[])
+
 	args = parser.parse_args()
+
 	args.input_format = args.input_format or ("csv" if fnmatch.fnmatch(
 	    args.input.name, "*.csv") else "json")
+
 	if not args.output:
 		directoryname, filename = os.path.split(args.input.name)
 		file = os.path.splitext(filename)[0]
 		args.output = os.path.join(directoryname, file + ".png")
+
+	if args.categories and len(args.categories) > 0 and not args.output_dir:
+		directoryname, filename = os.path.split(args.output)
+		args.output_dir = directoryname
+
 	if len(args.data_point_names) < 1:
 		print(
 		    "You must specify 1 or more valid data point names",
@@ -343,23 +439,35 @@ def main():
 		    file=sys.stderr)
 		sys.exit(1)
 
+	benchmarks = None
 	if is_csv:
 		c = csv.reader(args.input)
-		benchmarks, benchmark_heuristics = parse_csv(c, data_point_names,
-		                                             time_scales)
-		draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
-		           time_scales)
+		benchmarks = parse_csv(c, data_point_names, time_scales,
+		                       args.categories)
 	elif is_json:
 		j = json.load(args.input)
-		benchmarks, benchmark_heuristics = parse_json(
-		    j, data_point_names, time_scales)
-
-		draw_graph(name, benchmarks, benchmark_heuristics, data_point_names,
-		           time_scales)
+		benchmarks = parse_json(j, data_point_names, time_scales,
+		                        args.categories)
 	else:
-		pass
+		return
 
-	plt.savefig(args.output, bbox_inches='tight', transparent=False)
+	# we are okay to draw
+	# draw for each category
+	for benchmarks_key in benchmarks:
+		b = benchmarks[benchmarks_key]
+		category = benchmarks_key
+		if category == None or len(category) < 1:
+			category = name
+		benchmark_name = category.replace("_measure",
+		                                  "").replace("_", " ").strip()
+		figures, axes = draw_graph(benchmark_name, category, b,
+		                           data_point_names, time_scales)
+		# save drawn figures
+		save_name = benchmark_name
+		savetarget = os.path.join(args.output_dir, save_name + '.png')
+		print("Saving graph: {} (to '{}')".format(save_name, savetarget))
+		plt.savefig(savetarget, format='png')
+		plt.close(figures)
 
 
 if __name__ == "__main__":

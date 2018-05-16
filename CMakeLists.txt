@@ -161,7 +161,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 	)
 endif()
 
-set(LB_SHOOTOUT_REPETITIONS 1000
+set(LB_SHOOTOUT_REPETITIONS 250
 	CACHE STRING "The number of times to re-rerun the benchmarks to gather additional data"
 )
 set(LB_SHOOTOUT_FORMAT json 
@@ -170,38 +170,21 @@ string(TOLOWER ${LB_SHOOTOUT_FORMAT} LB_SHOOTOUT_FORMAT_LOWER)
 set(LB_SHOOTOUT_FORMAT ${LB_SHOOTOUT_FORMAT_LOWER} 
 	CACHE STRING "The output format of the data. Must be json or csv" FORCE)
 
-file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/benchmark_results")
-set(LB_SHOOTOUT_OUTFILE "${CMAKE_BINARY_DIR}/benchmark_results/lua_bindings_shootout.reset.${LB_SHOOTOUT_FORMAT}")
-set(LB_SHOOTOUT_GRAPH_OUTFILE "${CMAKE_BINARY_DIR}/benchmark_results/lua_bindings_shootout.reset.png")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/benchmark_results")
+set(LB_SHOOTOUT_OUTFILE "${CMAKE_SOURCE_DIR}/benchmark_results/lua_bindings_shootout.${LB_SHOOTOUT_FORMAT}")
+set(LB_SHOOTOUT_GRAPH_OUTFILE "${CMAKE_SOURCE_DIR}/benchmark_results/")
+
+set(lb_shootout_categories global_string_get_measure,global_string_set_measure,table_get_measure,table_set_measure,table_chained_get_measure,table_chained_set_measure,c_function_measure,c_function_through_lua_in_c_measure,lua_function_in_c_measure,member_function_call_measure,userdata_variable_access_measure,userdata_variable_access_large_measure,userdata_variable_access_last_measure,multi_return_lua_measure,multi_return_measure,stateful_function_object_measure,base_derived_measure,return_userdata_measure,optional_success_measure,optional_half_failure_measure,optional_failure_measure,implicit_inheritance_measure)
 
 add_custom_target(run_shootout
-	COMMAND lua_bindings_shootout "--benchmark_out=${LB_SHOOTOUT_OUTFILE}" "--benchmark_out_format=${LB_SHOOTOUT_FORMAT}" "--benchmark_repetitions=${LB_SHOOTOUT_REPETITIONS}" "--benchmark_filter=reset"
-	COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/benchmarks/tools/generate_graphs.py" 
+	COMMAND lua_bindings_shootout "--benchmark_out=${LB_SHOOTOUT_OUTFILE}" 
+	"--benchmark_out_format=${LB_SHOOTOUT_FORMAT}" 
+	"--benchmark_repetitions=${LB_SHOOTOUT_REPETITIONS}"
+	COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tools/generate_graphs.py" 
 		"--input=${LB_SHOOTOUT_OUTFILE}"
 		"--input_format=${LB_SHOOTOUT_FORMAT}"
-		"--output=${LB_SHOOTOUT_GRAPH_OUTFILE}"
-		"--categories=global_string_get_measure,
-		global_string_set_measure,
-		table_get_measure,
-		table_set_measure,
-		table_chained_get_measure,
-		table_chained_set_measure,
-		c_function_measure,
-		lua_function_through_c_measure,
-		lua_function_measure,
-		member_function_call_measure,
-		userdata_variable_access_measure,
-		userdata_variable_access_large_measure,
-		userdata_variable_access_last_measure,
-		multi_return_lua_measure,
-		multi_return_measure,
-		stateful_function_object_measure,
-		base_derived_measure,
-		return_userdata_measure,
-		optional_success_measure,
-		optional_half_failure_measure,
-		optional_failure_measure,
-		implicit_inheritance_measure"
+		"--output_dir=${LB_SHOOTOUT_GRAPH_OUTFILE}"
+		"--categories=${lb_shootout_categories}"
 	DEPENDS lua_bindings_shootout
 	BYPRODUCTS ${LB_SHOOTOUT_OUTFILE} ${LB_SHOOTOUT_GRAPH_OUTFILE}
 	COMMENT "Executing Benchmarks and outputting to '${LB_SHOOTOUT_OUTFILE}' then running graphs for '${LB_SHOOTOUT_GRAPH_OUTFILE}'"

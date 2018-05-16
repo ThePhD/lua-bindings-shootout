@@ -26,7 +26,7 @@
 #include "lbs_lib.hpp"
 #include "benchmark.hpp"
 
-void plain_c_global_string_get_measure(benchmark::State& benchmark_state) {
+void plain_c_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
 
@@ -42,7 +42,7 @@ void plain_c_global_string_get_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void plain_c_global_string_set_measure(benchmark::State& benchmark_state) {
+void plain_c_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
 
@@ -173,39 +173,47 @@ void plain_c_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void plain_c_lua_function_measure(benchmark::State& benchmark_state) {
+void plain_c_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(false);
 	lua_State* L = lua.get();
 
 	lbs::lua_bench_do_or_die(L, "function f (i) return i end");
+	lua_getglobal(L, "f");
+	int registry_index = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		lua_getglobal(L, "f");
+		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		lua_pop(L, 1);
 		x += v;
 	}
+	luaL_unref(L, LUA_REGISTRYINDEX, registry_index);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void plain_c_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void plain_c_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 
 	lua_pushcfunction(L, &lbs::basic_call_wrap);
 	lua_setglobal(L, "f");
+	lua_getglobal(L, "f");
+	int registry_index = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		lua_getglobal(L, "f");
+		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		x += v;
 		lua_pop(L, 1);
 	}
+	luaL_unref(L, LUA_REGISTRYINDEX, registry_index);
+	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
 void plain_c_member_function_call_measure(benchmark::State& benchmark_state) {
@@ -331,16 +339,19 @@ void plain_c_stateful_function_object_measure(benchmark::State& benchmark_state)
 	lua_setmetatable(L, -2);
 	lua_pushcclosure(L, &lbs::basic_stateful_wrap, 1);
 	lua_setglobal(L, "f");
+	lua_getglobal(L, "f");
+	int registry_index = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		lua_getglobal(L, "f");
+		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
 		x += v;
 		lua_pop(L, 1);
 	}
+	luaL_unref(L, LUA_REGISTRYINDEX, registry_index);
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
@@ -350,10 +361,12 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 
 	lua_pushcclosure(L, &lbs::basic_multi_return_wrap, 0);
 	lua_setglobal(L, "f");
+	lua_getglobal(L, "f");
+	int registry_index = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
-		lua_getglobal(L, "f");
+		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 2, LUA_NOREF, 0, nullptr);
 		double v = static_cast<double>(lua_tonumber(L, -1));
@@ -362,6 +375,7 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 		x += w;
 		lua_pop(L, 2);
 	}
+	luaL_unref(L, LUA_REGISTRYINDEX, registry_index);
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * (lbs::magic_value() * 3));
 }
 
@@ -393,7 +407,9 @@ void plain_c_base_derived_measure(benchmark::State& benchmark_state) {
 	struct kill_me {
 		lbs::complex_ab& ab;
 
-		kill_me(lbs::complex_ab& ab_) : ab(ab_) {}
+		kill_me(lbs::complex_ab& ab_)
+		: ab(ab_) {
+		}
 		~kill_me() {
 			ab.~complex_ab();
 		}
@@ -556,15 +572,15 @@ void plain_c_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(plain_c_global_string_get_measure);
-BENCHMARK(plain_c_global_string_set_measure);
+BENCHMARK(plain_c_table_global_string_get_measure);
+BENCHMARK(plain_c_table_global_string_set_measure);
 BENCHMARK(plain_c_table_get_measure);
 BENCHMARK(plain_c_table_set_measure);
 BENCHMARK(plain_c_table_chained_get_measure);
 BENCHMARK(plain_c_table_chained_set_measure);
 BENCHMARK(plain_c_c_function_measure);
-BENCHMARK(plain_c_lua_function_through_c_measure);
-BENCHMARK(plain_c_lua_function_measure);
+BENCHMARK(plain_c_c_function_through_lua_in_c_measure);
+BENCHMARK(plain_c_lua_function_in_c_measure);
 BENCHMARK(plain_c_member_function_call_measure);
 BENCHMARK(plain_c_userdata_variable_access_measure);
 BENCHMARK(plain_c_userdata_variable_access_large_measure);

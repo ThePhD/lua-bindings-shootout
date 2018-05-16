@@ -1,7 +1,7 @@
 // lua bindings shootout
 // The MIT License (MIT)
 
-// Copyright © 2018 ThePhD
+// Copyright ï¿½ 2018 ThePhD
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -26,13 +26,13 @@
 
 #include "swig_lib.gen.hpp"
 
-void swig_global_string_get_measure(benchmark::State& benchmark_state) {
+void swig_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
 }
 
-void swig_global_string_set_measure(benchmark::State& benchmark_state) {
+void swig_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
@@ -65,7 +65,7 @@ void swig_table_chained_set_measure(benchmark::State& benchmark_state) {
 void swig_c_function_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "f = swig_lib.basic_call");
@@ -80,13 +80,13 @@ void swig_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void swig_lua_function_measure(benchmark::State& benchmark_state) {
+void swig_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
 }
 
-void swig_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void swig_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
 	return;
@@ -95,7 +95,7 @@ void swig_lua_function_through_c_measure(benchmark::State& benchmark_state) {
 void swig_member_function_call_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "b = swig_lib.basic()");
@@ -113,7 +113,7 @@ void swig_member_function_call_measure(benchmark::State& benchmark_state) {
 void swig_userdata_variable_access_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "b = swig_lib.basic()");
@@ -136,7 +136,7 @@ void swig_userdata_variable_access_large_measure(benchmark::State& benchmark_sta
 
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "b = swig_lib.basic_large()");
@@ -159,7 +159,7 @@ void swig_userdata_variable_access_last_measure(benchmark::State& benchmark_stat
 
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "b = swig_lib.basic_large()");
@@ -231,7 +231,7 @@ void swig_optional_failure_measure(benchmark::State& benchmark_state) {
 void swig_return_userdata_measure(benchmark::State& benchmark_state) {
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "f = swig_lib.basic_return");
@@ -252,7 +252,7 @@ void swig_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	// E.g., we're doing something wrong
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
-	
+
 
 	luaopen_swig_lib(L);
 	lbs::lua_bench_do_or_die(L, "b = swig_lib.complex_ab()");
@@ -267,20 +267,21 @@ void swig_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(swig_global_string_get_measure);
-BENCHMARK(swig_global_string_set_measure);
+BENCHMARK(swig_table_global_string_get_measure);
+BENCHMARK(swig_table_global_string_set_measure);
 BENCHMARK(swig_table_get_measure);
 BENCHMARK(swig_table_set_measure);
 BENCHMARK(swig_table_chained_get_measure);
 BENCHMARK(swig_table_chained_set_measure);
 BENCHMARK(swig_c_function_measure);
-BENCHMARK(swig_lua_function_through_c_measure);
-BENCHMARK(swig_lua_function_measure);
+BENCHMARK(swig_c_function_through_lua_in_c_measure);
+BENCHMARK(swig_lua_function_in_c_measure);
 BENCHMARK(swig_member_function_call_measure);
 BENCHMARK(swig_userdata_variable_access_measure);
 BENCHMARK(swig_userdata_variable_access_large_measure);
 BENCHMARK(swig_userdata_variable_access_last_measure);
 BENCHMARK(swig_multi_return_measure);
+BENCHMARK(swig_multi_return_lua_measure);
 BENCHMARK(swig_stateful_function_object_measure);
 BENCHMARK(swig_base_derived_measure);
 BENCHMARK(swig_return_userdata_measure);

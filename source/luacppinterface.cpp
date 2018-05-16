@@ -26,7 +26,7 @@
 
 #include <LuaCppInterface/luacppinterface.h>
 
-void luacppinterface_global_string_get_measure(benchmark::State& benchmark_state) {
+void luacppinterface_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	Lua l;
 	auto lua = l.GetGlobalEnvironment();
 	lua_atpanic(lua.GetState().get(), lbs::panic_throw);
@@ -39,7 +39,7 @@ void luacppinterface_global_string_get_measure(benchmark::State& benchmark_state
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luacppinterface_global_string_set_measure(benchmark::State& benchmark_state) {
+void luacppinterface_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	Lua l;
 	auto lua = l.GetGlobalEnvironment();
 	lua_atpanic(lua.GetState().get(), lbs::panic_throw);
@@ -148,7 +148,7 @@ void luacppinterface_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void luacppinterface_lua_function_measure(benchmark::State& benchmark_state) {
+void luacppinterface_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	Lua l;
 	auto lua = l.GetGlobalEnvironment();
 	lua_State* L = lua.GetState().get();
@@ -170,7 +170,7 @@ void luacppinterface_lua_function_measure(benchmark::State& benchmark_state) {
 	lbs::expect(benchmark_state, x, benchmark_state.iterations() * lbs::magic_value());
 }
 
-void luacppinterface_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void luacppinterface_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	Lua l;
 	auto lua = l.GetGlobalEnvironment();
 	lua_State* L = lua.GetState().get();
@@ -338,15 +338,15 @@ void luacppinterface_implicit_inheritance_measure(benchmark::State& benchmark_st
 	return;
 }
 
-BENCHMARK(luacppinterface_global_string_get_measure);
-BENCHMARK(luacppinterface_global_string_set_measure);
+BENCHMARK(luacppinterface_table_global_string_get_measure);
+BENCHMARK(luacppinterface_table_global_string_set_measure);
 BENCHMARK(luacppinterface_table_get_measure);
 BENCHMARK(luacppinterface_table_set_measure);
 BENCHMARK(luacppinterface_table_chained_get_measure);
 BENCHMARK(luacppinterface_table_chained_set_measure);
 BENCHMARK(luacppinterface_c_function_measure);
-BENCHMARK(luacppinterface_lua_function_through_c_measure);
-BENCHMARK(luacppinterface_lua_function_measure);
+BENCHMARK(luacppinterface_c_function_through_lua_in_c_measure);
+BENCHMARK(luacppinterface_lua_function_in_c_measure);
 BENCHMARK(luacppinterface_member_function_call_measure);
 BENCHMARK(luacppinterface_userdata_variable_access_measure);
 BENCHMARK(luacppinterface_userdata_variable_access_large_measure);

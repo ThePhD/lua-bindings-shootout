@@ -40,7 +40,7 @@ namespace lbs {
 	}
 
 	inline void unsupported(benchmark::State& benchmark_state) {
-		unsupported(benchmark_state, "operation is unsupported!");
+		unsupported(benchmark_state, "unsupported");
 	}
 
 	const int repetition = 1000;

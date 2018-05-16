@@ -34,13 +34,13 @@
 #include "toluapp_lib.gen.hpp"
 #undef TOLUA_API
 
-void toluapp_global_string_get_measure(benchmark::State& benchmark_state) {
+void toluapp_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	// No table abstraction
 	lbs::unsupported(benchmark_state);
 	return;
 }
 
-void toluapp_global_string_set_measure(benchmark::State& benchmark_state) {
+void toluapp_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	// No table abstraction
 	lbs::unsupported(benchmark_state);
 	return;
@@ -90,13 +90,13 @@ void toluapp_c_function_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-void toluapp_lua_function_measure(benchmark::State& benchmark_state) {
+void toluapp_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	// No table abstraction
 	lbs::unsupported(benchmark_state);
 	return;
 }
 
-void toluapp_lua_function_through_c_measure(benchmark::State& benchmark_state) {
+void toluapp_c_function_through_lua_in_c_measure(benchmark::State& benchmark_state) {
 	// No table abstraction
 	lbs::unsupported(benchmark_state);
 	return;
@@ -208,6 +208,15 @@ void toluapp_multi_return_measure(benchmark::State& benchmark_state) {
 	return;
 }
 
+void toluapp_multi_return_lua_measure(benchmark::State& benchmark_state) {
+	// Unsupported
+	// tolua does not support multiple returns that are not ALSO input
+	// parameters...
+	// kinda crappy tbh
+	lbs::unsupported(benchmark_state);
+	return;
+}
+
 void toluapp_base_derived_measure(benchmark::State& benchmark_state) {
 	// Unsupported
 	lbs::unsupported(benchmark_state);
@@ -273,19 +282,20 @@ void toluapp_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lbs::lua_bench_unload(L, code_index);
 }
 
-BENCHMARK(toluapp_global_string_get_measure);
-BENCHMARK(toluapp_global_string_set_measure);
+BENCHMARK(toluapp_table_global_string_get_measure);
+BENCHMARK(toluapp_table_global_string_set_measure);
 BENCHMARK(toluapp_table_get_measure);
 BENCHMARK(toluapp_table_set_measure);
 BENCHMARK(toluapp_table_chained_get_measure);
 BENCHMARK(toluapp_table_chained_set_measure);
 BENCHMARK(toluapp_c_function_measure);
-BENCHMARK(toluapp_lua_function_through_c_measure);
-BENCHMARK(toluapp_lua_function_measure);
+BENCHMARK(toluapp_c_function_through_lua_in_c_measure);
+BENCHMARK(toluapp_lua_function_in_c_measure);
 BENCHMARK(toluapp_member_function_call_measure);
 BENCHMARK(toluapp_userdata_variable_access_measure);
 BENCHMARK(toluapp_userdata_variable_access_large_measure);
 BENCHMARK(toluapp_userdata_variable_access_last_measure);
+BENCHMARK(toluapp_multi_return_lua_measure);
 BENCHMARK(toluapp_multi_return_measure);
 BENCHMARK(toluapp_stateful_function_object_measure);
 BENCHMARK(toluapp_base_derived_measure);
