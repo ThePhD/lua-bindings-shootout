@@ -192,7 +192,7 @@ void swig_multi_return_lua_measure(benchmark::State& benchmark_state) {
 
 
 	luaopen_swig_lib(L);
-	lbs::lua_bench_do_or_die(L, "f = swig_lib.basic_return");
+	lbs::lua_bench_do_or_die(L, "f = swig_lib.basic_multi_return_out");
 
 	lbs::lua_bench_do_or_die(L, lbs::lua_multi_return_check);
 

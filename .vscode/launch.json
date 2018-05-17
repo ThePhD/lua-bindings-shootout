@@ -40,7 +40,7 @@
 			]
 		},
 		{
-			"name": "Run",
+			"name": "lua_bindings_shootout",
 			"type": "cppvsdbg",
 			"request": "launch",
 			"preLaunchTask": "cmake build",

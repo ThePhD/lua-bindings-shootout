@@ -43,17 +43,18 @@ namespace lbs {
 		unsupported(benchmark_state, "unsupported");
 	}
 
-	const int repetition = 1000;
-	const std::string repetition_s = "1000";
+	inline const std::size_t repetition() {
+		static const std::size_t value = 50;
+		return value;
+	}
 
-	template <typename Fx>
-	inline void repeated(Fx&& fx) {
-		for (int i = 0; i < repetition; ++i)
-			fx();
+	inline const std::string& repetition_s() {
+		static const std::string value = std::to_string(repetition());
+		return value;
 	}
 
 	inline std::string repeated_code(std::string code) {
-		return "for i=0," + repetition_s + " do " + code + " end";
+		return "for i=0," + repetition_s() + " do " + code + " end";
 	}
 
 } // namespace lbs
