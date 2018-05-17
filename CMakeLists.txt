@@ -166,7 +166,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 	)
 endif()
 
-set(LB_SHOOTOUT_REPETITIONS 250
+set(LB_SHOOTOUT_REPETITIONS 150
 	CACHE STRING "The number of times to re-rerun the benchmarks to gather additional data"
 )
 set(LB_SHOOTOUT_FORMAT json 

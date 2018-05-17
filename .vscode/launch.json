@@ -14,7 +14,7 @@
 				"--input=benchmark_results/lua_bindings_shootout.json",
 				"--input_format=json",
 				"--output_dir=benchmark_results",
-				"--scale=1000",
+				"--scale=50",
 				"--scale_categories",
 				"c_function_measure",
 				"member_function_call_measure",

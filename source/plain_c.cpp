@@ -35,7 +35,7 @@ void plain_c_table_global_string_get_measure(benchmark::State& benchmark_state) 
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua_getglobal(L, "value");
-		double v = static_cast<double>(lua_tonumber(L, -1));
+		double v = lua_tonumber(L, -1);
 		x += v;
 		lua_pop(L, 1);
 	}
@@ -73,7 +73,7 @@ void plain_c_table_get_measure(benchmark::State& benchmark_state) {
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		lua_getfield(L, -1, "value");
-		double v = static_cast<double>(lua_tonumber(L, -1));
+		double v = lua_tonumber(L, -1);
 		x += v;
 		lua_pop(L, 1);
 	}
@@ -185,7 +185,7 @@ void plain_c_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	for (auto _ : benchmark_state) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
-		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
+		lua_callk(L, 1, 1, 0, nullptr);
 		double v = lua_tonumber(L, -1);
 		lua_pop(L, 1);
 		x += v;
@@ -207,8 +207,8 @@ void plain_c_c_function_through_lua_in_c_measure(benchmark::State& benchmark_sta
 	for (auto _ : benchmark_state) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
-		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
-		double v = static_cast<double>(lua_tonumber(L, -1));
+		lua_callk(L, 1, 1, 0, nullptr);
+		double v = lua_tonumber(L, -1);
 		x += v;
 		lua_pop(L, 1);
 	}
@@ -346,8 +346,8 @@ void plain_c_stateful_function_object_measure(benchmark::State& benchmark_state)
 	for (auto _ : benchmark_state) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
-		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
-		double v = static_cast<double>(lua_tonumber(L, -1));
+		lua_callk(L, 1, 1, 0, nullptr);
+		double v = lua_tonumber(L, -1);
 		x += v;
 		lua_pop(L, 1);
 	}
@@ -368,9 +368,9 @@ void plain_c_multi_return_measure(benchmark::State& benchmark_state) {
 	for (auto _ : benchmark_state) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
-		lua_pcallk(L, 1, 2, LUA_NOREF, 0, nullptr);
-		double v = static_cast<double>(lua_tonumber(L, -1));
-		double w = static_cast<double>(lua_tonumber(L, -2));
+		lua_callk(L, 1, 2, 0, nullptr);
+		double v = lua_tonumber(L, -1);
+		double w = lua_tonumber(L, -2);
 		x += v;
 		x += w;
 		lua_pop(L, 2);
@@ -474,7 +474,7 @@ void plain_c_optional_failure_measure(benchmark::State& benchmark_state) {
 		if (lua_type(L, -1) != LUA_TNIL) {
 			lua_getfield(L, -1, "value");
 			if (lua_type(L, -1) != LUA_TNIL) {
-				double v = static_cast<double>(lua_tonumber(L, -1));
+				double v = lua_tonumber(L, -1);
 				x += v;
 			}
 			else {
@@ -502,7 +502,7 @@ void plain_c_optional_half_failure_measure(benchmark::State& benchmark_state) {
 		if (lua_type(L, -1) != LUA_TNIL) {
 			lua_getfield(L, -1, "value");
 			if (lua_type(L, -1) != LUA_TNIL) {
-				double v = static_cast<double>(lua_tonumber(L, -1));
+				double v = lua_tonumber(L, -1);
 				x += v;
 			}
 			else {
@@ -530,7 +530,7 @@ void plain_c_optional_success_measure(benchmark::State& benchmark_state) {
 		if (lua_type(L, -1) != LUA_TNIL) {
 			lua_getfield(L, -1, "value");
 			if (lua_type(L, -1) != LUA_TNIL) {
-				double v = static_cast<double>(lua_tonumber(L, -1));
+				double v = lua_tonumber(L, -1);
 				x += v;
 			}
 			else {

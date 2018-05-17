@@ -322,7 +322,7 @@ def draw_graph(name, category, benchmarks_heuristics, data_point_names,
 			return '0'
 		if value.is_integer():
 			return '{0:.0f}'.format(value * xscale[3])
-		return '{0:.2f}'.format(value * xscale[3])
+		return '{0:.1f}'.format(value * xscale[3])
 
 	axes.set_xlim([0, benchmarks_max + (absolute_range * 0.25)])
 	axes.xaxis.set_major_formatter(
