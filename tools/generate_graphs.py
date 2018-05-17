@@ -97,13 +97,15 @@ def aggregate_categories(all_benchmarks, data_point_names):
 	return benchmarks
 
 
-def parse_csv(c, data_point_names, time_scales, categories):
+def parse_csv(c, data_point_names, categories, scale, scale_categories,
+              time_scales):
 	all_benchmarks = []
 
 	return aggregate_categories(all_benchmarks, data_point_names)
 
 
-def parse_json(j, data_point_names, time_scales, categories):
+def parse_json(j, data_point_names, categories, scale, scale_categories,
+               time_scales):
 	timescale_units = [x[0] for x in time_scales]
 
 	all_benchmarks = []
@@ -122,9 +124,12 @@ def parse_json(j, data_point_names, time_scales, categories):
 
 		category = ""
 		benchmark_name = base_name
+		point_scalar = 1
 		if len(potential_categories) == 1:
 			category = potential_categories[0]
 			benchmark_name = base_name.replace(category, "").strip("_")
+			if category in scale_categories:
+				point_scalar = 1 / scale
 
 		if (len(potential_targets) < 1):
 			all_benchmarks.append({
@@ -167,7 +172,7 @@ def parse_json(j, data_point_names, time_scales, categories):
 				point_name = point_name_lower[0]
 				point_list = data[point_name]
 				point = j_benchmark[point_name]
-				point_adjusted = point * to_seconds_multiplier
+				point_adjusted = point * to_seconds_multiplier * point_scalar
 				point_list.append(point_adjusted)
 				heuristics["min"] = min(heuristics["min"], point_adjusted)
 				heuristics["max"] = max(heuristics["max"], point_adjusted)
@@ -180,7 +185,7 @@ def parse_json(j, data_point_names, time_scales, categories):
 			for point_name_lower in data_point_names:
 				point_name = point_name_lower[0]
 				point = j_benchmark[point_name]
-				point_adjusted = point * to_seconds_multiplier
+				point_adjusted = point * to_seconds_multiplier * point_scalar
 				statistic[point_name] = point_adjusted
 
 	return aggregate_categories(all_benchmarks, data_point_names)
@@ -390,6 +395,8 @@ def main():
 	    '-p', '--data_point_names', nargs='+', default=['real_time'])
 	parser.add_argument('-l', '--lower', nargs='+', default=['real_time'])
 	parser.add_argument('-c', '--categories', nargs='+', default=[])
+	parser.add_argument('-s', '--scale', nargs='?', type=int, default=1)
+	parser.add_argument('-t', '--scale_categories', nargs='+', default=[])
 
 	args = parser.parse_args()
 
@@ -442,12 +449,14 @@ def main():
 	benchmarks = None
 	if is_csv:
 		c = csv.reader(args.input)
-		benchmarks = parse_csv(c, data_point_names, time_scales,
-		                       args.categories)
+		benchmarks = parse_csv(c, data_point_names, args.categories,
+		                       args.scale, args.scale_categories,
+		                       time_scales)
 	elif is_json:
 		j = json.load(args.input)
-		benchmarks = parse_json(j, data_point_names, time_scales,
-		                        args.categories)
+		benchmarks = parse_json(j, data_point_names, args.categories,
+		                        args.scale, args.scale_categories,
+		                        time_scales)
 	else:
 		return
 

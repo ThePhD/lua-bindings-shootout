@@ -128,7 +128,7 @@ void selene_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	lua(R"(function f (i)
 			return i;
 		end)");
-	sel::function<int(int)> f = lua["f"];
+	sel::function<double(double)> f = lua["f"];
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -143,7 +143,7 @@ void selene_c_function_through_lua_in_c_measure(benchmark::State& benchmark_stat
 	lua.HandleExceptionsWith(lbs::selene_panic_throw);
 
 	lua["f"] = lbs::basic_call;
-	sel::function<int(int)> f = lua["f"];
+	sel::function<double(double)> f = lua["f"];
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = f(lbs::magic_value());

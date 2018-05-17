@@ -5,18 +5,28 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Generate Graphs",
+			"name": "graphs",
 			"type": "python",
 			"request": "launch",
 			"program": "${workspaceFolder}/tools/generate_graphs.py",
 			"console": "integratedTerminal",
 			"args": [
-				"--input=benchmark_results/lua_bindings_shootout.Desktop.json",
+				"--input=benchmark_results/lua_bindings_shootout.json",
 				"--input_format=json",
 				"--output_dir=benchmark_results",
+				"--scale=1000",
+				"--scale_categories",
+				"c_function_measure",
+				"member_function_call_measure",
+				"userdata_variable_access_measure",
+				"userdata_variable_access_large_measure",
+				"userdata_variable_access_last_measure",
+				"multi_return_lua_measure",
+				"return_userdata_measure",
+				"implicit_inheritance_measure",
 				"--categories",
-				"global_string_get_measure",
-				"global_string_set_measure",
+				"table_global_string_get_measure",
+				"table_global_string_set_measure",
 				"table_get_measure",
 				"table_set_measure",
 				"table_chained_get_measure",
@@ -36,7 +46,7 @@
 				"optional_success_measure",
 				"optional_half_failure_measure",
 				"optional_failure_measure",
-				"implicit_inheritance_measure"
+				"implicit_inheritance_measure",
 			]
 		},
 		{

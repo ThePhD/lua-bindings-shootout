@@ -186,7 +186,7 @@ void plain_c_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, registry_index);
 		lua_pushnumber(L, lbs::magic_value());
 		lua_pcallk(L, 1, 1, LUA_NOREF, 0, nullptr);
-		double v = static_cast<double>(lua_tonumber(L, -1));
+		double v = lua_tonumber(L, -1);
 		lua_pop(L, 1);
 		x += v;
 	}

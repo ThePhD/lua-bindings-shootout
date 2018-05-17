@@ -44,7 +44,11 @@ namespace lbs {
 	}
 
 	inline const std::size_t repetition() {
+#if defined(LUA_BINDINGS_SHOOTOUT_LUA_REPETITIONS)
+		static const std::size_t value = LUA_BINDINGS_SHOOTOUT_LUA_REPETITIONS;
+#else
 		static const std::size_t value = 50;
+#endif
 		return value;
 	}
 

@@ -5,8 +5,8 @@
 
 namespace lbs {
 
-	inline int magic_value() {
-		static const int v = 3;
+	inline double magic_value() {
+		static const double v = 3;
 		return v;
 	}
 

@@ -73,14 +73,11 @@ void luawrapper_table_chained_get_measure(benchmark::State& benchmark_state) {
 	lua_State* L = get_luawrapper_main_state(lua);
 
 	lua.writeVariable("ulahibe",
-		std::map<std::string, std::map<std::string, double>> {
+		std::map<std::string, std::map<std::string, double>>{
 			{ "warble",
 				std::map<std::string, double>{
-					{ "value", lbs::magic_value() }
-			}
-			},
-	}
-	);
+					{ "value", lbs::magic_value() } } },
+		});
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua.readVariable<double>("ulahibe", "warble", "value");
@@ -94,14 +91,11 @@ void luawrapper_table_chained_set_measure(benchmark::State& benchmark_state) {
 	lua_State* L = get_luawrapper_main_state(lua);
 
 	lua.writeVariable("ulahibe",
-		std::map<std::string, std::map<std::string, double>> {
+		std::map<std::string, std::map<std::string, double>>{
 			{ "warble",
 				std::map<std::string, double>{
-					{ "value", lbs::magic_value() }
-			}
-			},
-	}
-	);
+					{ "value", lbs::magic_value() } } },
+		});
 	double v = 0;
 	for (auto _ : benchmark_state) {
 		v += lbs::magic_value();
@@ -116,12 +110,10 @@ void luawrapper_table_chained_set_measure(benchmark::State& benchmark_state) {
 void luawrapper_table_get_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
-	
+
 	lua.writeVariable("warble",
-		std::map<std::string, double> {
-			{ "value", lbs::magic_value() }
-	}
-	);
+		std::map<std::string, double>{
+			{ "value", lbs::magic_value() } });
 	double x = 0;
 	for (auto _ : benchmark_state) {
 		double v = lua.readVariable<double>("warble", "value");
@@ -133,12 +125,10 @@ void luawrapper_table_get_measure(benchmark::State& benchmark_state) {
 void luawrapper_table_set_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua);
-	
+
 	lua.writeVariable("warble",
-		std::map<std::string, double> {
-			{ "value", lbs::magic_value() }
-	}
-	);
+		std::map<std::string, double>{
+			{ "value", lbs::magic_value() } });
 	double v = 0;
 	for (auto _ : benchmark_state) {
 		v += lbs::magic_value();
@@ -173,7 +163,7 @@ void luawrapper_lua_function_in_c_measure(benchmark::State& benchmark_state) {
 	lua.executeCode(R"(function f (i)
 			return i;
 		end)");
-	auto f = lua.readVariable<std::function<int(int)>>("f");
+	auto f = lua.readVariable<std::function<double(double)>>("f");
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -188,7 +178,7 @@ void luawrapper_c_function_through_lua_in_c_measure(benchmark::State& benchmark_
 	lua_State* L = get_luawrapper_main_state(lua);
 
 	lua.writeFunction("f", &lbs::basic_call);
-	auto f = lua.readVariable<std::function<int(int)>>("f");
+	auto f = lua.readVariable<std::function<double(double)>>("f");
 
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -201,7 +191,7 @@ void luawrapper_c_function_through_lua_in_c_measure(benchmark::State& benchmark_
 void luawrapper_member_function_call_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua, true);
-	
+
 	lua.registerFunction<double (lbs::basic::*)()>("get", [](lbs::basic& b) { return b.get(); });
 	lua.registerFunction<void (lbs::basic::*)(double)>("set", [](lbs::basic& b, double num) { b.set(num); });
 	lua.writeVariable("b", lbs::basic());
@@ -227,7 +217,7 @@ void luawrapper_userdata_variable_access_measure(benchmark::State& benchmark_sta
 	lua.registerMember("var3", &lbs::basic::var3);
 	lua.registerMember("var4", &lbs::basic::var4);
 	lua.writeVariable("b", lbs::basic());
-	
+
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_check);
 
 	std::string code = lbs::repeated_code(lbs::userdata_variable_access_code);
@@ -454,7 +444,7 @@ void luawrapper_base_derived_measure(benchmark::State& benchmark_state) {
 void luawrapper_return_userdata_measure(benchmark::State& benchmark_state) {
 	LuaContext lua;
 	lua_State* L = get_luawrapper_main_state(lua, true);
-	
+
 	lua.writeFunction("f", &lbs::basic_return);
 	lua.writeFunction("h", &lbs::basic_get_var);
 

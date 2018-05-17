@@ -91,7 +91,7 @@ void oolua_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
-	int oolua_value = lbs::magic_value();
+	double oolua_value = lbs::magic_value();
 	set_global(vm, "value", oolua_value);
 	double x = 0;
 	for (auto _ : benchmark_state) {
@@ -106,7 +106,7 @@ void oolua_table_global_string_set_measure(benchmark::State& benchmark_state) {
 	using namespace OOLUA;
 	Script vm;
 	lua_atpanic(vm, lbs::panic_throw);
-	int oolua_value = lbs::magic_value();
+	double oolua_value = lbs::magic_value();
 	set_global(vm, "value", oolua_value);
 	double v = 0;
 	for (auto _ : benchmark_state) {
