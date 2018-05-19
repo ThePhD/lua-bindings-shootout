@@ -277,8 +277,10 @@ target_compile_definitions(${liblua}
 	PUBLIC LUA_COMPAT_ALL)
 get_target_property(lualib_target_type ${liblua} TYPE)
 if (lualib_target_type STREQUAL "SHARED_LIBRARY")
-	target_compile_definitions(${liblua}
-		PUBLIC LUA_BUILD_AS_DLL)
+	if (WIN32)
+		target_compile_definitions(${liblua}
+			PUBLIC LUA_BUILD_AS_DLL)
+	endif()
 endif ()
 if (WIN32)
 	#target_compile_definitions(${liblua}
