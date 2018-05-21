@@ -33,13 +33,35 @@ set(oolua_dev_toplevel "${CMAKE_BINARY_DIR}/vendor/oolua_${oolua_version}")
 set(oolua_include_dirs "${oolua_dev_toplevel}/include")
 
 # # OOLua library sources
-file(GLOB_RECURSE oolua_sources 
-	LIST_DIRECTORIES false 
-	"${oolua_dev_toplevel}/src/*.cpp"
-	"${oolua_dev_toplevel}/src/*.c"
+set(oolua_sources
+	src/class_from_stack.cpp
+	src/oolua.cpp
+	src/oolua_check_result.cpp
+	src/oolua_chunk.cpp
+	src/oolua_error.cpp
+	src/oolua_exception.cpp
+	src/oolua_function.cpp
+	src/oolua_helpers.cpp
+	src/oolua_open.cpp
+	src/oolua_pull.cpp
+	src/oolua_push.cpp
+	src/oolua_ref.cpp
+	src/oolua_registration.cpp
+	src/oolua_script.cpp
+	src/oolua_stack_dump.cpp
+	src/oolua_string.cpp
+	src/oolua_table.cpp
+	src/proxy_storage.cpp
+	src/push_pointer_internal.cpp
+	src/stack_get.cpp
 )
-#prepend(oolua_sources "${oolua_dev_toplevel}/src/" ${oolua_sources})
-list(APPEND oolua_sources "${oolua_dev_toplevel}/include/oolua.h")
+prepend(oolua_sources "${oolua_dev_toplevel}/" ${oolua_sources})
+#file(GLOB_RECURSE oolua_sources
+#	LIST_DIRECTORIES false 
+#	"${oolua_dev_toplevel}/src/*.cpp"
+#	"${oolua_dev_toplevel}/src/*.c"
+#)
+#list(APPEND oolua_sources "${oolua_dev_toplevel}/include/oolua.h")
 
 # # External project to get sources
 ExternalProject_Add(OOLUA_DEV_SOURCE

@@ -33,12 +33,11 @@ set(luaapipp_dev_toplevel "${CMAKE_BINARY_DIR}/vendor/luaapipp_${luaapipp_versio
 set(luaapipp_include_dirs "${luaapipp_dev_toplevel}/")
 
 # # LuaApipp library sources
-file(GLOB_RECURSE luaapipp_sources 
-	LIST_DIRECTORIES false 
-	"${luaapipp_dev_toplevel}/impl/*.cpp"
+set(luaapipp_sources
+	impl.cpp
+	lua.hpp
 )
-#prepend(luaapipp_sources "${luaapipp_dev_toplevel}/src/" ${luaapipp_sources})
-list(APPEND luaapipp_sources "${luaapipp_dev_toplevel}/luapp/lua.hpp")
+#prepend(luaapipp_sources "${luaapipp_dev_toplevel}/luapp/" ${luaapipp_sources})
 
 # # External project to get sources
 ExternalProject_Add(LUAAPIPP_DEV_SOURCE
