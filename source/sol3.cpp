@@ -22,11 +22,15 @@
 
 #define SOL_NO_EXCEPTIONS 1
 #define SOL_NO_CHECK_NUMBER_PRECISION 1
-#include <sol.hpp>
+#include <sol/sol.hpp>
 
 #include "benchmark.hpp"
 #include "lbs_lib.hpp"
 #include "lbs_lua.hpp"
+
+SOL_DERIVED_CLASSES(lbs::complex_base_a, lbs::complex_ab);
+SOL_DERIVED_CLASSES(lbs::complex_base_b, lbs::complex_ab);
+SOL_BASE_CLASSES(lbs::complex_ab, lbs::complex_base_a, lbs::complex_base_b);
 
 void sol3_table_global_string_get_measure(benchmark::State& benchmark_state) {
 	sol::state lua;
@@ -152,14 +156,14 @@ void sol3_member_function_call_measure(benchmark::State& benchmark_state) {
 	sol::state lua(lbs::panic_throw);
 	lua.open_libraries();
 	lua_State* L = lua;
-	lua.new_usertype<lbs::basic>("c",
-		"get", sol::c_call<decltype(&lbs::basic::get), &lbs::basic::get>,
-		"set", sol::c_call<decltype(&lbs::basic::set), &lbs::basic::set>);
+	auto ut = lua.new_usertype<lbs::basic>("c");
+	ut["get"] = sol::c_call<decltype(&lbs::basic::get), &lbs::basic::get>;
+	ut["set"] = sol::c_call<decltype(&lbs::basic::set), &lbs::basic::set>;
 	lua.script("b = c.new()");
 
 	lbs::lua_bench_do_or_die(L, lbs::member_function_call_check);
 
-	std::string code = lbs::repeated_code("b:set(i) b:get()");
+	std::string code = lbs::repeated_code(lbs::member_function_call_code);
 	int code_index = lbs::lua_bench_load_up(L, code.c_str(), code.size());
 	for (auto _ : benchmark_state) {
 		lbs::lua_bench_preload_do_or_die(L, code_index);
@@ -171,8 +175,8 @@ void sol3_userdata_variable_access_measure(benchmark::State& benchmark_state) {
 	sol::state lua(lbs::panic_throw);
 	lua.open_libraries();
 	lua_State* L = lua;
-	lua.new_usertype<lbs::basic>("c",
-		"var", &lbs::basic::var);
+	auto ut = lua.new_usertype<lbs::basic>("c");
+	ut["var"] = &lbs::basic::var;
 	lua.script("b = c.new()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_check);
@@ -190,58 +194,58 @@ void sol3_userdata_variable_access_large_measure(benchmark::State& benchmark_sta
 	lua.open_libraries();
 	lua_State* L = lua;
 
-	lua.new_usertype<lbs::basic_large>("cl",
-		"var", &lbs::basic_large::var,
-		"var0", &lbs::basic_large::var0,
-		"var1", &lbs::basic_large::var1,
-		"var2", &lbs::basic_large::var2,
-		"var3", &lbs::basic_large::var3,
-		"var4", &lbs::basic_large::var4,
-		"var5", &lbs::basic_large::var5,
-		"var6", &lbs::basic_large::var6,
-		"var7", &lbs::basic_large::var7,
-		"var8", &lbs::basic_large::var8,
-		"var9", &lbs::basic_large::var9,
-		"var10", &lbs::basic_large::var10,
-		"var11", &lbs::basic_large::var11,
-		"var12", &lbs::basic_large::var12,
-		"var13", &lbs::basic_large::var13,
-		"var14", &lbs::basic_large::var14,
-		"var15", &lbs::basic_large::var15,
-		"var16", &lbs::basic_large::var16,
-		"var17", &lbs::basic_large::var17,
-		"var18", &lbs::basic_large::var18,
-		"var19", &lbs::basic_large::var19,
-		"var20", &lbs::basic_large::var20,
-		"var21", &lbs::basic_large::var21,
-		"var22", &lbs::basic_large::var22,
-		"var23", &lbs::basic_large::var23,
-		"var24", &lbs::basic_large::var24,
-		"var25", &lbs::basic_large::var25,
-		"var26", &lbs::basic_large::var26,
-		"var27", &lbs::basic_large::var27,
-		"var28", &lbs::basic_large::var28,
-		"var29", &lbs::basic_large::var29,
-		"var30", &lbs::basic_large::var30,
-		"var31", &lbs::basic_large::var31,
-		"var32", &lbs::basic_large::var32,
-		"var33", &lbs::basic_large::var33,
-		"var34", &lbs::basic_large::var34,
-		"var35", &lbs::basic_large::var35,
-		"var36", &lbs::basic_large::var36,
-		"var37", &lbs::basic_large::var37,
-		"var38", &lbs::basic_large::var38,
-		"var39", &lbs::basic_large::var39,
-		"var40", &lbs::basic_large::var40,
-		"var41", &lbs::basic_large::var41,
-		"var42", &lbs::basic_large::var42,
-		"var43", &lbs::basic_large::var43,
-		"var44", &lbs::basic_large::var44,
-		"var45", &lbs::basic_large::var45,
-		"var46", &lbs::basic_large::var46,
-		"var47", &lbs::basic_large::var47,
-		"var48", &lbs::basic_large::var48,
-		"var49", &lbs::basic_large::var49);
+	auto ut = lua.new_usertype<lbs::basic_large>("cl");
+	ut["var"] = &lbs::basic_large::var;
+	ut["var0"] = &lbs::basic_large::var0;
+	ut["var1"] = &lbs::basic_large::var1;
+	ut["var2"] = &lbs::basic_large::var2;
+	ut["var3"] = &lbs::basic_large::var3;
+	ut["var4"] = &lbs::basic_large::var4;
+	ut["var5"] = &lbs::basic_large::var5;
+	ut["var6"] = &lbs::basic_large::var6;
+	ut["var7"] = &lbs::basic_large::var7;
+	ut["var8"] = &lbs::basic_large::var8;
+	ut["var9"] = &lbs::basic_large::var9;
+	ut["var10"] = &lbs::basic_large::var10;
+	ut["var11"] = &lbs::basic_large::var11;
+	ut["var12"] = &lbs::basic_large::var12;
+	ut["var13"] = &lbs::basic_large::var13;
+	ut["var14"] = &lbs::basic_large::var14;
+	ut["var15"] = &lbs::basic_large::var15;
+	ut["var16"] = &lbs::basic_large::var16;
+	ut["var17"] = &lbs::basic_large::var17;
+	ut["var18"] = &lbs::basic_large::var18;
+	ut["var19"] = &lbs::basic_large::var19;
+	ut["var20"] = &lbs::basic_large::var20;
+	ut["var21"] = &lbs::basic_large::var21;
+	ut["var22"] = &lbs::basic_large::var22;
+	ut["var23"] = &lbs::basic_large::var23;
+	ut["var24"] = &lbs::basic_large::var24;
+	ut["var25"] = &lbs::basic_large::var25;
+	ut["var26"] = &lbs::basic_large::var26;
+	ut["var27"] = &lbs::basic_large::var27;
+	ut["var28"] = &lbs::basic_large::var28;
+	ut["var29"] = &lbs::basic_large::var29;
+	ut["var30"] = &lbs::basic_large::var30;
+	ut["var31"] = &lbs::basic_large::var31;
+	ut["var32"] = &lbs::basic_large::var32;
+	ut["var33"] = &lbs::basic_large::var33;
+	ut["var34"] = &lbs::basic_large::var34;
+	ut["var35"] = &lbs::basic_large::var35;
+	ut["var36"] = &lbs::basic_large::var36;
+	ut["var37"] = &lbs::basic_large::var37;
+	ut["var38"] = &lbs::basic_large::var38;
+	ut["var39"] = &lbs::basic_large::var39;
+	ut["var40"] = &lbs::basic_large::var40;
+	ut["var41"] = &lbs::basic_large::var41;
+	ut["var42"] = &lbs::basic_large::var42;
+	ut["var43"] = &lbs::basic_large::var43;
+	ut["var44"] = &lbs::basic_large::var44;
+	ut["var45"] = &lbs::basic_large::var45;
+	ut["var46"] = &lbs::basic_large::var46;
+	ut["var47"] = &lbs::basic_large::var47;
+	ut["var48"] = &lbs::basic_large::var48;
+	ut["var49"] = &lbs::basic_large::var49;
 	lua.script("b = cl.new()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_check);
@@ -258,58 +262,58 @@ void sol3_userdata_variable_access_last_measure(benchmark::State& benchmark_stat
 	sol::state lua(lbs::panic_throw);
 	lua.open_libraries();
 	lua_State* L = lua;
-	lua.new_usertype<lbs::basic_large>("cl",
-		"var", &lbs::basic_large::var,
-		"var0", &lbs::basic_large::var0,
-		"var1", &lbs::basic_large::var1,
-		"var2", &lbs::basic_large::var2,
-		"var3", &lbs::basic_large::var3,
-		"var4", &lbs::basic_large::var4,
-		"var5", &lbs::basic_large::var5,
-		"var6", &lbs::basic_large::var6,
-		"var7", &lbs::basic_large::var7,
-		"var8", &lbs::basic_large::var8,
-		"var9", &lbs::basic_large::var9,
-		"var10", &lbs::basic_large::var10,
-		"var11", &lbs::basic_large::var11,
-		"var12", &lbs::basic_large::var12,
-		"var13", &lbs::basic_large::var13,
-		"var14", &lbs::basic_large::var14,
-		"var15", &lbs::basic_large::var15,
-		"var16", &lbs::basic_large::var16,
-		"var17", &lbs::basic_large::var17,
-		"var18", &lbs::basic_large::var18,
-		"var19", &lbs::basic_large::var19,
-		"var20", &lbs::basic_large::var20,
-		"var21", &lbs::basic_large::var21,
-		"var22", &lbs::basic_large::var22,
-		"var23", &lbs::basic_large::var23,
-		"var24", &lbs::basic_large::var24,
-		"var25", &lbs::basic_large::var25,
-		"var26", &lbs::basic_large::var26,
-		"var27", &lbs::basic_large::var27,
-		"var28", &lbs::basic_large::var28,
-		"var29", &lbs::basic_large::var29,
-		"var30", &lbs::basic_large::var30,
-		"var31", &lbs::basic_large::var31,
-		"var32", &lbs::basic_large::var32,
-		"var33", &lbs::basic_large::var33,
-		"var34", &lbs::basic_large::var34,
-		"var35", &lbs::basic_large::var35,
-		"var36", &lbs::basic_large::var36,
-		"var37", &lbs::basic_large::var37,
-		"var38", &lbs::basic_large::var38,
-		"var39", &lbs::basic_large::var39,
-		"var40", &lbs::basic_large::var40,
-		"var41", &lbs::basic_large::var41,
-		"var42", &lbs::basic_large::var42,
-		"var43", &lbs::basic_large::var43,
-		"var44", &lbs::basic_large::var44,
-		"var45", &lbs::basic_large::var45,
-		"var46", &lbs::basic_large::var46,
-		"var47", &lbs::basic_large::var47,
-		"var48", &lbs::basic_large::var48,
-		"var49", &lbs::basic_large::var49);
+	auto ut = lua.new_usertype<lbs::basic_large>("cl");
+	ut["var"] = &lbs::basic_large::var;
+	ut["var0"] = &lbs::basic_large::var0;
+	ut["var1"] = &lbs::basic_large::var1;
+	ut["var2"] = &lbs::basic_large::var2;
+	ut["var3"] = &lbs::basic_large::var3;
+	ut["var4"] = &lbs::basic_large::var4;
+	ut["var5"] = &lbs::basic_large::var5;
+	ut["var6"] = &lbs::basic_large::var6;
+	ut["var7"] = &lbs::basic_large::var7;
+	ut["var8"] = &lbs::basic_large::var8;
+	ut["var9"] = &lbs::basic_large::var9;
+	ut["var10"] = &lbs::basic_large::var10;
+	ut["var11"] = &lbs::basic_large::var11;
+	ut["var12"] = &lbs::basic_large::var12;
+	ut["var13"] = &lbs::basic_large::var13;
+	ut["var14"] = &lbs::basic_large::var14;
+	ut["var15"] = &lbs::basic_large::var15;
+	ut["var16"] = &lbs::basic_large::var16;
+	ut["var17"] = &lbs::basic_large::var17;
+	ut["var18"] = &lbs::basic_large::var18;
+	ut["var19"] = &lbs::basic_large::var19;
+	ut["var20"] = &lbs::basic_large::var20;
+	ut["var21"] = &lbs::basic_large::var21;
+	ut["var22"] = &lbs::basic_large::var22;
+	ut["var23"] = &lbs::basic_large::var23;
+	ut["var24"] = &lbs::basic_large::var24;
+	ut["var25"] = &lbs::basic_large::var25;
+	ut["var26"] = &lbs::basic_large::var26;
+	ut["var27"] = &lbs::basic_large::var27;
+	ut["var28"] = &lbs::basic_large::var28;
+	ut["var29"] = &lbs::basic_large::var29;
+	ut["var30"] = &lbs::basic_large::var30;
+	ut["var31"] = &lbs::basic_large::var31;
+	ut["var32"] = &lbs::basic_large::var32;
+	ut["var33"] = &lbs::basic_large::var33;
+	ut["var34"] = &lbs::basic_large::var34;
+	ut["var35"] = &lbs::basic_large::var35;
+	ut["var36"] = &lbs::basic_large::var36;
+	ut["var37"] = &lbs::basic_large::var37;
+	ut["var38"] = &lbs::basic_large::var38;
+	ut["var39"] = &lbs::basic_large::var39;
+	ut["var40"] = &lbs::basic_large::var40;
+	ut["var41"] = &lbs::basic_large::var41;
+	ut["var42"] = &lbs::basic_large::var42;
+	ut["var43"] = &lbs::basic_large::var43;
+	ut["var44"] = &lbs::basic_large::var44;
+	ut["var45"] = &lbs::basic_large::var45;
+	ut["var46"] = &lbs::basic_large::var46;
+	ut["var47"] = &lbs::basic_large::var47;
+	ut["var48"] = &lbs::basic_large::var48;
+	ut["var49"] = &lbs::basic_large::var49;
 	lua.script("b = cl.new()");
 
 	lbs::lua_bench_do_or_die(L, lbs::userdata_variable_access_large_last_check);
@@ -368,11 +372,10 @@ void sol3_multi_return_measure(benchmark::State& benchmark_state) {
 
 void sol3_base_derived_measure(benchmark::State& benchmark_state) {
 	sol::state lua(lbs::panic_throw);
-	lua.new_usertype<lbs::complex_ab>("cab",
-		"a_func", sol::c_call<decltype(&lbs::complex_ab::a_func), &lbs::complex_ab::a_func>,
-		"b_func", sol::c_call<decltype(&lbs::complex_ab::b_func), &lbs::complex_ab::b_func>,
-		"ab_func", sol::c_call<decltype(&lbs::complex_ab::ab_func), &lbs::complex_ab::ab_func>,
-		sol::base_classes, sol::bases<lbs::complex_base_a, lbs::complex_base_b>());
+	auto ut = lua.new_usertype<lbs::complex_ab>("cab");
+	ut["a_func"] = sol::c_call<decltype(&lbs::complex_ab::a_func), &lbs::complex_ab::a_func>;
+	ut["b_func"] = sol::c_call<decltype(&lbs::complex_ab::b_func), &lbs::complex_ab::b_func>;
+	ut["ab_func"] = sol::c_call<decltype(&lbs::complex_ab::ab_func), &lbs::complex_ab::ab_func>;
 	lbs::complex_ab ab;
 	// Set and verify correctness
 	lua.set("b", &ab);
@@ -437,7 +440,7 @@ void sol3_return_userdata_measure(benchmark::State& benchmark_state) {
 	lua_State* L = lua;
 
 	lua.set_function("f", sol::c_call<decltype(&lbs::basic_return), lbs::basic_return>);
-	lua.set_function("h", lbs::basic_get_var);
+	lua.set_function("h", &lbs::basic_get_var);
 
 	lbs::lua_bench_do_or_die(L, lbs::return_userdata_check);
 
@@ -454,18 +457,17 @@ void sol3_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	lua.open_libraries();
 	lua_State* L = lua;
 
-	lua.new_usertype<lbs::complex_base_a>("ca",
-		"a", &lbs::complex_base_a::a,
-		"a_func", sol::c_call<decltype(&lbs::complex_base_a::a_func), &lbs::complex_base_a::a_func>);
+	auto uta = lua.new_usertype<lbs::complex_base_a>("ca");
+	uta["a"] = &lbs::complex_base_a::a;
+	uta["a_func"] = sol::c_call<decltype(&lbs::complex_base_a::a_func), &lbs::complex_base_a::a_func>;
 
-	lua.new_usertype<lbs::complex_base_b>("cb",
-		"b", &lbs::complex_base_b::b,
-		"b_func", sol::c_call<decltype(&lbs::complex_base_b::b_func), &lbs::complex_base_b::b_func>);
+	auto utb = lua.new_usertype<lbs::complex_base_b>("cb");
+	utb["b"] = &lbs::complex_base_b::b;
+	utb["b_func"] = sol::c_call<decltype(&lbs::complex_base_b::b_func), &lbs::complex_base_b::b_func>;
 
-	lua.new_usertype<lbs::complex_ab>("cab",
-		"ab", &lbs::complex_ab::ab,
-		"ab_func", sol::c_call<decltype(&lbs::complex_ab::ab_func), &lbs::complex_ab::ab_func>,
-		sol::base_classes, sol::bases<lbs::complex_base_a, lbs::complex_base_b>());
+	auto utab = lua.new_usertype<lbs::complex_ab>("cab");
+	utab["ab"] = &lbs::complex_ab::ab;
+	utab["ab_func"] = sol::c_call<decltype(&lbs::complex_ab::ab_func), &lbs::complex_ab::ab_func>;
 
 	lbs::complex_ab ab;
 	// Set and verify correctness

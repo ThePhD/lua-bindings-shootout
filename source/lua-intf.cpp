@@ -507,6 +507,8 @@ void lua_intf_optional_success_measure(benchmark::State& benchmark_state) {
 }
 
 void lua_intf_implicit_inheritance_measure(benchmark::State& benchmark_state) {
+	lbs::unsupported(benchmark_state);
+	return;
 	// Unsupported?
 	// Ask author
 	LuaIntf::LuaContext lua;

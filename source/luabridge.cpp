@@ -554,6 +554,10 @@ void luabridge_optional_failure_measure(benchmark::State& benchmark_state) {
 
 void luabridge_implicit_inheritance_measure(benchmark::State& benchmark_state) {
 	// Only single inheritance
+	// Unsupported.
+	lbs::unsupported(benchmark_state);
+	return;
+
 	auto lua = lbs::create_state(true);
 	lua_State* L = lua.get();
 

@@ -31,4 +31,5 @@
 		"stack": "cpp",
 		"iostream": "cpp"
 	},
+	"C_Cpp.configurationWarnings": "Disabled",
 }

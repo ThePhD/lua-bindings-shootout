@@ -11,9 +11,9 @@
 			"program": "${workspaceFolder}/tools/generate_graphs.py",
 			"console": "integratedTerminal",
 			"args": [
-				"--input=benchmark_results/lua_bindings_shootout.json",
+				"--input=benchmark_results/new/lua_bindings_shootout.new.json",
 				"--input_format=json",
-				"--output_dir=benchmark_results",
+				"--output_dir=benchmark_results/new",
 				"--scale=50",
 				"--scale_categories",
 				"c_function_measure",

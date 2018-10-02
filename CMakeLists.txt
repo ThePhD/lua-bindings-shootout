@@ -28,6 +28,8 @@ project("lua bindings shootout"
 	LANGUAGES C CXX
 )
 
+add_compile_options($<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/std:c++latest>)
+
 # # CMake Modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")
 
@@ -138,7 +140,7 @@ target_link_libraries(lua_bindings_shootout
 	${LUWRA_LIBRARIES}
 	${LUAINTF_LIBRARIES}
 	${OOLUA_LIBRARIES}
-	sol2
+	sol2::sol2
 	# benchmarking library and utilities
 	Threads::Threads
 	benchmark

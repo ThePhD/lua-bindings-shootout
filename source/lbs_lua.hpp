@@ -470,7 +470,7 @@ namespace lbs {
 	const std::string return_userdata_check = "b = f(46705) x = h(b) assert(x == 46705)";
 	const std::string return_userdata_code = "b = f(i)";
 
-	const std::string implicit_inheritance_check = "x = b:b_func() assert(x == " + magic_value_string() + ")";
+	const std::string implicit_inheritance_check = "x = b:b_func() y = b:a_func() assert(x == " + magic_value_string() + ") assert(y == " + magic_value_string() + ")";
 	const std::string implicit_inheritance_code = "b:b_func()";
 
 	const std::string stateful_call_check = "x = f(670384) assert(x == 670384)";
